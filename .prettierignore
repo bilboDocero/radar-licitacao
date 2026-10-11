@@ -1,0 +1,13 @@
+node_modules
+dist
+.nuxt
+.output
+.local
+.turbo
+pnpm-lock.yaml
+estrategia.md
+memoria.md
+radar-licitacao
+packages/database/migrations/meta
+playwright-report
+test-results

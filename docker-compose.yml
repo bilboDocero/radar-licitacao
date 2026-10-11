@@ -1,0 +1,93 @@
+name: radar
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment: { POSTGRES_USER: radar, POSTGRES_PASSWORD: radar_local, POSTGRES_DB: radar }
+    ports: ['127.0.0.1:5432:5432']
+    volumes:
+      [
+        'postgres-data:/var/lib/postgresql/data',
+        './infrastructure/docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro',
+      ]
+    healthcheck:
+      {
+        test: ['CMD-SHELL', 'pg_isready -U radar -d radar'],
+        interval: 3s,
+        timeout: 3s,
+        retries: 30,
+      }
+  redis:
+    image: redis:7-alpine
+    command: ['redis-server', '--appendonly', 'yes']
+    ports: ['127.0.0.1:6379:6379']
+    volumes: ['redis-data:/data']
+    healthcheck: { test: ['CMD', 'redis-cli', 'ping'], interval: 3s, timeout: 3s, retries: 30 }
+  mailpit:
+    image: axllent/mailpit:v1.28
+    ports: ['127.0.0.1:8025:8025']
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.5
+    command: ['start-dev', '--import-realm']
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: radar
+      KC_DB_PASSWORD: radar_local
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin-local
+      KC_HOSTNAME: http://localhost:8080
+      KC_HTTP_ENABLED: 'true'
+      KC_HEALTH_ENABLED: 'true'
+    ports: ['127.0.0.1:8080:8080']
+    volumes: ['./infrastructure/docker/realm.json:/opt/keycloak/data/import/realm.json:ro']
+    depends_on: { postgres: { condition: service_healthy } }
+  migrate:
+    profiles: ['full']
+    build: { context: ., dockerfile: infrastructure/docker/Dockerfile }
+    command: ['sh', '-c', 'pnpm db:migrate && pnpm db:seed']
+    env_file: .env
+    environment: { DATABASE_URL: 'postgresql://radar:radar_local@postgres:5432/radar' }
+    depends_on: { postgres: { condition: service_healthy } }
+  api:
+    profiles: ['full']
+    build: { context: ., dockerfile: infrastructure/docker/Dockerfile }
+    command: ['pnpm', '--filter', '@radar/api', 'dev']
+    env_file: .env
+    environment: &backend-env
+      DATABASE_URL: postgresql://radar:radar_local@postgres:5432/radar
+      REDIS_URL: redis://redis:6379
+      OIDC_JWKS_URL: http://keycloak:8080/realms/radar/protocol/openid-connect/certs
+    ports: ['127.0.0.1:4000:4000']
+    depends_on:
+      {
+        migrate: { condition: service_completed_successfully },
+        redis: { condition: service_healthy },
+      }
+  worker:
+    profiles: ['full']
+    build: { context: ., dockerfile: infrastructure/docker/Dockerfile }
+    command: ['pnpm', '--filter', '@radar/worker', 'dev']
+    env_file: .env
+    environment: *backend-env
+    depends_on: { api: { condition: service_started } }
+  collector:
+    profiles: ['full']
+    build: { context: ., dockerfile: infrastructure/docker/Dockerfile }
+    command: ['pnpm', '--filter', '@radar/collector', 'dev']
+    env_file: .env
+    environment: *backend-env
+    depends_on: { api: { condition: service_started } }
+  web:
+    profiles: ['full']
+    build: { context: ., dockerfile: infrastructure/docker/Dockerfile }
+    command: ['pnpm', '--filter', '@radar/web', 'dev']
+    env_file: .env
+    environment:
+      NUXT_API_BASE: http://api:4000/api/v1
+      NUXT_REDIS_URL: redis://redis:6379
+      NUXT_OIDC_INTERNAL_ORIGIN: http://keycloak:8080
+    ports: ['127.0.0.1:3000:3000']
+    depends_on: { api: { condition: service_started }, keycloak: { condition: service_started } }
+volumes:
+  postgres-data:
+  redis-data:

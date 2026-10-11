@@ -1,0 +1,32 @@
+{
+  "name": "@radar/collector",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsup src/main.ts src/runners/manual.ts --format esm --target node22 --sourcemap",
+    "typecheck": "tsc --noEmit",
+    "collect": "tsx src/runners/manual.ts"
+  },
+  "dependencies": {
+    "@radar/config": "workspace:*",
+    "@radar/contracts": "workspace:*",
+    "@radar/database": "workspace:*",
+    "@radar/events": "workspace:*",
+    "@radar/source-sdk": "workspace:*",
+    "bullmq": "^5.66.4",
+    "ioredis": "^5.8.2",
+    "drizzle-orm": "^0.45.1",
+    "zod": "^3.25.76",
+    "crawlee": "^3.15.3",
+    "cheerio": "^1.1.2",
+    "playwright": "^1.57.0",
+    "dotenv": "^17.2.3",
+    "pino": "^9.14.0",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/sdk-node": "^0.208.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.67.2",
+    "zod-to-json-schema": "3.25.1",
+    "pg": "^8.16.3"
+  }
+}

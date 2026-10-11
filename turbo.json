@@ -1,0 +1,13 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": ["tsconfig.json", ".env"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".output/**", ".nuxt/**"],
+      "env": ["NUXT_*", "NODE_ENV"]
+    },
+    "typecheck": { "dependsOn": ["^typecheck"] },
+    "dev": { "cache": false, "persistent": true }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@radar/web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev --host 0.0.0.0 --dotenv ../../.env",
+    "build": "nuxt build",
+    "typecheck": "nuxt prepare && nuxt typecheck",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "nuxt": "^4.2.2",
+    "vue": "^3.5.26",
+    "@nuxt/ui": "^4.3.0",
+    "tailwindcss": "^4.1.18",
+    "nuxt-auth-utils": "^0.5.27",
+    "openid-client": "^6.8.1",
+    "ioredis": "^5.8.2",
+    "@radar/contracts": "workspace:*",
+    "@iconify-json/lucide": "^1.2.82"
+  },
+  "devDependencies": {
+    "vue-tsc": "^3.2.2"
+  }
+}

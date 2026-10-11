@@ -1,0 +1,9 @@
+node_modules
+**/node_modules
+**/.nuxt
+**/.output
+**/dist
+.git
+.local
+.env
+radar-licitacao

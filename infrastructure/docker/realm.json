@@ -1,0 +1,64 @@
+{
+  "realm": "radar",
+  "enabled": true,
+  "displayName": "Radar de Licitações · Local",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": true,
+  "resetPasswordAllowed": true,
+  "verifyEmail": true,
+  "loginWithEmailAllowed": true,
+  "sslRequired": "none",
+  "accessTokenLifespan": 300,
+  "smtpServer": {
+    "host": "mailpit",
+    "port": "1025",
+    "from": "acesso@radar.local",
+    "fromDisplayName": "Radar local"
+  },
+  "roles": { "realm": [{ "name": "platform-admin" }, { "name": "partner" }] },
+  "clients": [
+    {
+      "clientId": "radar-web",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "local-development-secret",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://localhost:3000/auth/callback"],
+      "webOrigins": ["http://localhost:3000"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:3000/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "radar-api audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": { "included.custom.audience": "radar-api", "access.token.claim": "true" }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "demo@radar.local",
+      "email": "demo@radar.local",
+      "firstName": "Empresa",
+      "lastName": "Demonstração",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "RadarLocal123!", "temporary": false }]
+    },
+    {
+      "username": "admin@radar.local",
+      "email": "admin@radar.local",
+      "firstName": "Admin",
+      "enabled": true,
+      "emailVerified": true,
+      "realmRoles": ["platform-admin"],
+      "credentials": [{ "type": "password", "value": "RadarAdmin123!", "temporary": false }]
+    }
+  ]
+}

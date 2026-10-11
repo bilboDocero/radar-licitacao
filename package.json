@@ -1,0 +1,51 @@
+{
+  "name": "radar-licitacoes",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.28.2",
+  "engines": {
+    "node": ">=22.14"
+  },
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "typecheck": "turbo typecheck",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "test": "vitest run --exclude tests/integration/**",
+    "test:integration": "node scripts/integration.mjs",
+    "test:e2e": "playwright test",
+    "infra:up": "docker compose up -d --wait postgres redis keycloak mailpit",
+    "infra:down": "docker compose down",
+    "db:generate": "pnpm --filter @radar/database generate",
+    "db:migrate": "pnpm --filter @radar/database migrate",
+    "db:seed": "pnpm --filter @radar/database seed",
+    "collect": "pnpm --filter @radar/collector collect",
+    "health": "node scripts/health.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@nestjs/common": "^11.1.11",
+    "@nestjs/core": "^11.1.11",
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^22.19.3",
+    "@types/pg": "^8.15.6",
+    "bullmq": "^5.66.4",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.45.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-vue": "^10.6.2",
+    "ioredis": "^5.8.2",
+    "jose": "^6.1.3",
+    "pg": "^8.16.3",
+    "prettier": "^3.7.4",
+    "reflect-metadata": "0.2.2",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "turbo": "^2.7.3",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.48.1",
+    "vitest": "^3.2.4",
+    "vue-eslint-parser": "^10.2.0"
+  }
+}
