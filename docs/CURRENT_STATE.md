@@ -194,8 +194,8 @@ A plataforma conta com:
 ### Resultado dos testes nesta verificação
 - **Comando executado:** `corepack pnpm test`
   - **Contexto:** Suíte de testes unitários com Vitest.
-  - **Resultado observado:** Aprovado (`3 passed, 28 passed, 0 failed` em 2.40s).
-  - **Detalhamento:** 10 testes de coleta PNCP (`collector.test.ts`), 10 testes de matching determinístico (`matching.test.ts`) e 8 testes de inteligência artificial (`document-intelligence.test.ts` com avaliação de editais reais e roteamento de modelos).
+  - **Resultado observado:** Aprovado (`4 passed, 35 passed, 0 failed` em 3.50s).
+  - **Detalhamento:** 10 testes de coleta PNCP (`collector.test.ts`), 10 testes de matching determinístico (`matching.test.ts`), 8 testes de inteligência artificial (`document-intelligence.test.ts` com avaliação de editais reais e roteamento de modelos) e 7 testes de contratos e sanitização/máscara de CNPJ (`contracts.test.ts`).
 - **Comando executado:** `corepack pnpm test:integration`
   - **Contexto:** Suíte de integração com criação dinâmica de banco PostgreSQL temporário isolado (`persistence.test.ts`).
   - **Resultado observado:** Aprovado (`1 passed, 7 passed, 0 failed` em 3.14s).

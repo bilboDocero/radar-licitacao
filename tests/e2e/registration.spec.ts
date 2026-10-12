@@ -23,6 +23,9 @@ test('cadastro com confirmação de e-mail e onboarding', async ({ page, request
   await expect(page).toHaveURL(/\/onboarding/);
   await expect(page.locator('html')).toHaveAttribute('data-radar-ready', 'true');
   await page.getByLabel('Nome da empresa').fill(`TESTE CADASTRO E2E ${Date.now()}`);
+  const uniqueCnpjDigits = `${Math.floor(10000000 + Math.random() * 90000000)}0001${Math.floor(10 + Math.random() * 90)}`;
+  const formattedCnpj = `${uniqueCnpjDigits.slice(0, 2)}.${uniqueCnpjDigits.slice(2, 5)}.${uniqueCnpjDigits.slice(5, 8)}/${uniqueCnpjDigits.slice(8, 12)}-${uniqueCnpjDigits.slice(12, 14)}`;
+  await page.getByLabel(/CNPJ/i).fill(formattedCnpj);
   await page.getByRole('button', { name: 'Criar empresa e continuar' }).click();
   await expect(page).toHaveURL(/perfil-comercial/);
 });

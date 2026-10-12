@@ -17,10 +17,11 @@ pnpm -r --filter "./packages/*" --filter "./apps/*" run typecheck
 ```bash
 pnpm test
 ```
-- **Resultado Observado:** 3 arquivos de teste e 28 testes aprovados (100% de sucesso):
+- **Resultado Observado:** 4 arquivos de teste e 35 testes aprovados (100% de sucesso):
   - `tests/unit/collector.test.ts` (10 testes): hashing canônico estável, proteção SSRF de URLs, normalização do fuso de Brasília e paginação do PNCP.
   - `tests/unit/matching.test.ts` (10 testes): algoritmo determinístico de matching, prioridade de local de execução vs. sede do órgão, normalização de acentos e descarte de prazos vencidos.
   - `tests/unit/document-intelligence.test.ts` (8 testes): Mock AI Provider, geração de Opportunity Briefs, roteador com failover automático, segmentação de seções documentais e avaliação com editais reais (TI, Obras e órgãos sem local definido).
+  - `tests/unit/contracts.test.ts` (7 testes): validação e sanitização de CNPJ (com e sem formatação), conversão de espaços, máscara dinâmica progressiva e formatação para exibição.
 
 ### 1.3. Teste de Fumaça de Inteligência Artificial
 ```bash

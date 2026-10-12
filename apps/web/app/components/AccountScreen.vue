@@ -97,7 +97,7 @@ const heading = computed(() => titles[props.section]!);
       ><template v-else-if="section === 'empresa'"
         ><h2 class="text-2xl font-semibold">{{ radar.organization.value?.name }}</h2>
         <dl class="space-y-4 mt-7 text-sm">
-          <div>CNPJ: {{ radar.organization.value?.cnpj || 'Não informado' }}</div>
+          <div>CNPJ: {{ formatCnpj(radar.organization.value?.cnpj) }}</div>
           <div>Seu papel: {{ radar.organization.value?.role }}</div>
           <div>Usuário: {{ user?.email }}</div>
         </dl>

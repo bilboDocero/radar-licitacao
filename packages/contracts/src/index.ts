@@ -33,7 +33,12 @@ export const organizationInput = z
     name: z.string().trim().min(3).max(160),
     cnpj: z
       .string()
-      .regex(/^\d{14}$/)
+      .trim()
+      .transform((val) => val.replace(/\D/g, ''))
+      .refine((val) => val.length === 0 || val.length === 14, {
+        message: 'CNPJ deve conter 14 dígitos numéricos',
+      })
+      .transform((val) => (val.length === 14 ? val : undefined))
       .optional(),
   })
   .strict();

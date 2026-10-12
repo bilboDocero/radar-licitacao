@@ -5,16 +5,35 @@ const name = ref('');
 const cnpj = ref('');
 const busy = ref(false);
 const mounted = ref(false);
-onMounted(() => { mounted.value = true; });
+onMounted(() => {
+  mounted.value = true;
+});
 const error = ref('');
 const radar = useRadar();
+
+function handleCnpjInput(event: Event) {
+  const target = event.target as HTMLInputElement;
+  cnpj.value = maskCnpjInput(target.value);
+}
+
 async function submit() {
   busy.value = true;
   error.value = '';
+
+  const cleanCnpj = cnpj.value.replace(/\D/g, '');
+  if (cleanCnpj.length > 0 && cleanCnpj.length !== 14) {
+    error.value = 'CNPJ incompleto. O CNPJ deve conter 14 dígitos (ex.: 00.000.000/0000-00).';
+    busy.value = false;
+    return;
+  }
+
   try {
     const org = await radar.api<Organization>('organizations', {
       method: 'POST',
-      body: { name: name.value, ...(cnpj.value ? { cnpj: cnpj.value.replace(/\D/g, '') } : {}) },
+      body: {
+        name: name.value,
+        ...(cleanCnpj.length === 14 ? { cnpj: cleanCnpj } : {}),
+      },
     });
     radar.activeOrganization.value = org.id;
     await radar.loadOrganizations();
@@ -45,11 +64,13 @@ async function submit() {
     ><label
       >CNPJ <span class="hint">Opcional nesta etapa</span
       ><input
-        v-model="cnpj"
+        :value="cnpj"
+        type="text"
         inputmode="numeric"
-        placeholder="Somente números"
-        pattern="[0-9]{14}"
-        maxlength="14" /></label
+        placeholder="00.000.000/0000-00"
+        maxlength="18"
+        autocomplete="off"
+        @input="handleCnpjInput" /></label
     ><UAlert v-if="error" color="error" :title="error" /><UButton
       type="submit"
       size="lg"
