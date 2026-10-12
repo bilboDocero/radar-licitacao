@@ -208,8 +208,8 @@ A plataforma conta com:
   - **Contexto:** Healthcheck das rotas e serviços locais.
   - **Resultado observado:** Aprovado (HTTP 200 para Web, API/PostgreSQL/Redis, OIDC Keycloak e Mailpit).
 - **Comando executado:** `corepack pnpm smoke:ai`
-  - **Contexto:** Script de verificação de conectividade e validação de saída estruturada de IA (`scripts/smoke-ai.mjs`).
-  - **Resultado observado:** Aprovado (`[SUCESSO] Resposta estruturada recebida: mock / mock-brief-v1`, latência 3ms, 846 tokens, custo $0.000000 USD).
+  - **Contexto:** Script de verificação de conectividade e validação de saída estruturada de IA (`scripts/smoke-ai.mjs`) com provedor real configurado.
+  - **Resultado observado:** Aprovado (`[SUCESSO] Resposta estruturada recebida: gemini / gemini-3.5-flash-lite`, latência 3.3s, 150 tokens in / 1.145 tokens out, custo real calculado $0.000355 USD). Requisitos fáticos e riscos extraídos em schema Zod estrito.
 - **Comando executado:** `corepack pnpm -r --filter "./packages/*" --filter "./apps/*" run typecheck`
   - **Contexto:** Checagem estrita de tipos TypeScript em todas as 4 aplicações e 6 pacotes.
   - **Resultado observado:** Aprovado com zero erros de tipagem.

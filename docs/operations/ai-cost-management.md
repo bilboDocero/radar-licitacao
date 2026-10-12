@@ -16,7 +16,8 @@ A regra econômica central do Radar de Licitações é o **compartilhamento da a
 | Modelo | Provedor | Entrada / 1M tokens | Saída / 1M tokens | Custo Médio Estimado por Edital |
 |---|---|---|---|---|
 | `mock-brief-v1` | Mock | $0.00 | $0.00 | **$0.0000** |
-| `gemini-2.0-flash` | Gemini | $0.10 | $0.40 | **~$0.0015** (0,8 centavos de real) |
+| `gemini-3.5-flash-lite` | Gemini | $0.075 | $0.30 | **~$0.0014** (0,8 centavos de real / nível gratuito) |
+| `gemini-2.5-flash` | Gemini | $0.10 | $0.40 | **~$0.0015** (0,8 centavos de real) |
 | `gpt-4o-mini` | OpenAI | $0.15 | $0.60 | **~$0.0025** (1,4 centavos de real) |
 | `gpt-4o` | OpenAI | $2.50 | $10.00 | **~$0.0380** (21 centavos de real) |
 

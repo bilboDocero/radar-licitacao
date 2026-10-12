@@ -6,7 +6,9 @@ import {
 } from '@radar/database';
 import {
   procurementAIAnalysisSchema,
+  tenderRequirementsExtractionSchema,
   type ProcurementAIAnalysis,
+  type TenderRequirementsExtraction,
 } from '@radar/contracts';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { AIModelRouter } from '../router/model-router.js';
@@ -94,12 +96,12 @@ REGRAS DE SEGURANÇA E FIDELIDADE:
 
     const userPrompt = `Analise os dados oficiais deste edital e produza a extração estruturada de requisitos:\n\n${documentBody}`;
 
-    const jsonSchema = zodToJsonSchema(procurementAIAnalysisSchema, {
+    const jsonSchema = zodToJsonSchema(tenderRequirementsExtractionSchema, {
       target: 'openApi3',
       $refStrategy: 'none',
     }) as Record<string, unknown>;
 
-    const response = await this.router.executeWithFallback<ProcurementAIAnalysis>(
+    const response = await this.router.executeWithFallback<TenderRequirementsExtraction>(
       'document.requirements_extraction',
       {
         messages: [
@@ -107,18 +109,28 @@ REGRAS DE SEGURANÇA E FIDELIDADE:
           { role: 'user', content: userPrompt },
         ],
         jsonSchema,
-        schemaName: 'ProcurementAIAnalysis',
+        schemaName: 'TenderRequirementsExtraction',
         temperature: 0.1,
       },
-      procurementAIAnalysisSchema,
+      tenderRequirementsExtractionSchema,
       { procurementId, version },
     );
 
-    const analysisData = response.data;
-    analysisData.procurementId = procurementId;
-    analysisData.version = version;
-    analysisData.provider = response.provider;
-    analysisData.model = response.model;
+    const extracted = response.data;
+    const analysisData: ProcurementAIAnalysis = {
+      procurementId,
+      version,
+      status: 'COMPLETED',
+      provider: response.provider,
+      model: response.model,
+      promptVersion: '1.0.0',
+      summary: extracted.summary,
+      executionPlace: extracted.executionPlace,
+      requirements: extracted.requirements,
+      risks: extracted.risks,
+      unverifiedPoints: extracted.unverifiedPoints,
+      analyzedAt: new Date().toISOString(),
+    };
 
     // Upsert analysis
     await this.db

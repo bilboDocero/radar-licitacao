@@ -28,11 +28,11 @@ pnpm test
 pnpm smoke:ai
 ```
 - **Resultado Observado:** Execução bem-sucedida do script `scripts/smoke-ai.mjs`.
-  - Provedor resolvido: `mock` (modelo: `mock-brief-v1`).
-  - Latência: ~3 ms.
-  - Consumo: 43 tokens de entrada / 803 tokens de saída (total: 846).
-  - Custo em USD: $0.000000.
-  - Validação Zod: Schema `procurementAIAnalysisSchema` validado com sucesso.
+  - Provedor resolvido: `gemini` (modelo real homologado: `gemini-3.5-flash-lite`).
+  - Latência: ~3.3 s.
+  - Consumo: 150 tokens de entrada / 1.145 tokens de saída (total: 1.295).
+  - Custo em USD: $0.000355.
+  - Validação Zod: Schema `tenderRequirementsExtractionSchema` validado com 6 requisitos extraídos (objeto, modalidade, habilitação jurídica, regularidade fiscal, capacidade técnica e prazo de impugnação) e 1 risco identificado.
 
 ### 1.4. Testes de Integração com Banco Isolado
 ```bash

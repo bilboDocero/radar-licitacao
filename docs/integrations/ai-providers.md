@@ -11,7 +11,7 @@ A arquitetura de IA é **multi-provider e agnóstica**. O sistema suporta múlti
 | Provedor | Adapter | Modelos Recomendados | Finalidade Principal |
 |---|---|---|---|
 | **Mock** | `MockAIProvider` | `mock-brief-v1` | Desenvolvimento local, testes unitários e CI sem custos. |
-| **Google Gemini** | `GeminiProvider` | `gemini-2.0-flash`, `gemini-1.5-flash` | Extração de requisitos com contexto longo e excelente custo-benefício. |
+| **Google Gemini** | `GeminiProvider` | `gemini-3.5-flash-lite`, `gemini-2.5-flash` | Extração de requisitos com contexto longo, nível gratuito de tokens e excelente custo-benefício. *(Nota: gemini-2.0-flash foi descontinuado em 01/06/2026).* |
 | **OpenAI** | `OpenAIProvider` | `gpt-4o-mini`, `gpt-4o` | Extração estruturada com modo JSON Schema estrito e alta fidelidade. |
 | **Anthropic** | Preparado | `claude-3-5-haiku` | Análise crítica e revisão de riscos. |
 | **Ollama** | Preparado | Modelos locais (Llama 3, Qwen) | Ambientes de desenvolvimento offline. |
@@ -39,10 +39,10 @@ A arquitetura de IA é **multi-provider e agnóstica**. O sistema suporta múlti
    ```env
    AI_ENABLED=true
    AI_DEFAULT_PROVIDER=gemini
-   AI_DEFAULT_MODEL=gemini-2.0-flash
+   AI_DEFAULT_MODEL=gemini-3.5-flash-lite
    GEMINI_API_KEY=AIzaSy...
    ```
-*Nota sobre cotas:* O Google AI Studio oferece um plano gratuito (com limites de taxa) ideal para desenvolvimento e testes de homologação.
+*Nota sobre modelos e cotas:* O modelo `gemini-2.0-flash` foi descontinuado em 01/06/2026. Recomendamos o modelo vigente `gemini-3.5-flash-lite`, que possui nível gratuito amplo para entrada e saída de tokens no Google AI Studio (até 15 RPM e 1.500 RPD), ideal para desenvolvimento e homologação.
 
 ### 2.3. OpenAI
 1. Acesse a [Plataforma OpenAI](https://platform.openai.com/).

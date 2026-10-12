@@ -46,6 +46,24 @@ export const MODEL_CATALOG: Record<string, ModelCapability> = {
     costPerMillionInputUsd: 2.5,
     costPerMillionOutputUsd: 10.0,
   },
+  'gemini-3.5-flash-lite': {
+    id: 'gemini-3.5-flash-lite',
+    providerId: 'gemini',
+    maxContext: 1048576,
+    maxOutput: 8192,
+    supportsStructuredJson: true,
+    costPerMillionInputUsd: 0.075,
+    costPerMillionOutputUsd: 0.3,
+  },
+  'gemini-2.5-flash': {
+    id: 'gemini-2.5-flash',
+    providerId: 'gemini',
+    maxContext: 1048576,
+    maxOutput: 8192,
+    supportsStructuredJson: true,
+    costPerMillionInputUsd: 0.1,
+    costPerMillionOutputUsd: 0.4,
+  },
   'gemini-2.0-flash': {
     id: 'gemini-2.0-flash',
     providerId: 'gemini',
@@ -110,7 +128,7 @@ export class AIModelRouter {
     if (taskType === 'document.requirements_extraction') {
       const gemini = this.providers.get('gemini');
       if (gemini?.isConfigured()) {
-        return { providerId: 'gemini', model: 'gemini-2.0-flash' };
+        return { providerId: 'gemini', model: 'gemini-3.5-flash-lite' };
       }
       const openai = this.providers.get('openai');
       if (openai?.isConfigured()) {

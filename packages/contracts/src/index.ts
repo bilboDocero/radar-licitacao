@@ -247,18 +247,22 @@ export const executionPlaceSchema = z.object({
 });
 export type ExecutionPlace = z.infer<typeof executionPlaceSchema>;
 
-export const procurementAIAnalysisSchema = z.object({
+export const tenderRequirementsExtractionSchema = z.object({
+  summary: z.string(),
+  executionPlace: executionPlaceSchema.nullable().default(null),
+  requirements: z.array(requirementSchema),
+  risks: z.array(riskItemSchema),
+  unverifiedPoints: z.array(z.string()),
+});
+export type TenderRequirementsExtraction = z.infer<typeof tenderRequirementsExtractionSchema>;
+
+export const procurementAIAnalysisSchema = tenderRequirementsExtractionSchema.extend({
   procurementId: z.string().uuid(),
   version: z.number().int(),
   status: z.enum(aiAnalysisStatuses),
   model: z.string(),
   provider: z.string(),
   promptVersion: z.string(),
-  summary: z.string(),
-  executionPlace: executionPlaceSchema.nullable().default(null),
-  requirements: z.array(requirementSchema),
-  risks: z.array(riskItemSchema),
-  unverifiedPoints: z.array(z.string()),
   analyzedAt: z.string(),
 });
 export type ProcurementAIAnalysis = z.infer<typeof procurementAIAnalysisSchema>;

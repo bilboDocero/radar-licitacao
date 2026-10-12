@@ -6,6 +6,7 @@ import {
   alertPreferenceInput,
   partnerInput,
   invitationInput,
+  tenderRequirementsExtractionSchema,
   procurementAIAnalysisSchema,
   opportunityBriefSchema,
 } from './index.js';
@@ -17,6 +18,7 @@ export const inputSchemas = Object.fromEntries(
     AlertPreferenceInput: alertPreferenceInput,
     PartnerInput: partnerInput,
     InvitationInput: invitationInput,
+    TenderRequirementsExtraction: tenderRequirementsExtractionSchema,
     ProcurementAIAnalysis: procurementAIAnalysisSchema,
     OpportunityBrief: opportunityBriefSchema,
   }).map(([name, schema]) => [

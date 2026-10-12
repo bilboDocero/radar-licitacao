@@ -19,6 +19,20 @@ interface GeminiResponse {
 
 const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+function cleanSchemaForGemini(schema: unknown): unknown {
+  if (!schema || typeof schema !== 'object') return schema;
+  if (Array.isArray(schema)) return schema.map(cleanSchemaForGemini);
+
+  const cleaned: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(schema)) {
+    if (['additionalProperties', '$schema', 'default'].includes(key)) {
+      continue;
+    }
+    cleaned[key] = cleanSchemaForGemini(value);
+  }
+  return cleaned;
+}
+
 export class GeminiProvider implements AIProvider {
   readonly id = 'gemini';
   readonly name = 'Google Gemini API';
@@ -63,7 +77,7 @@ export class GeminiProvider implements AIProvider {
     };
 
     if (request.jsonSchema) {
-      generationConfig.responseSchema = request.jsonSchema;
+      generationConfig.responseSchema = cleanSchemaForGemini(request.jsonSchema);
     }
 
     const body: Record<string, unknown> = {
