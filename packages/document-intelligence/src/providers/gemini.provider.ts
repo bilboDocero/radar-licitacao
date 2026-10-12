@@ -73,7 +73,7 @@ export class GeminiProvider implements AIProvider {
     const generationConfig: Record<string, unknown> = {
       responseMimeType: 'application/json',
       temperature: request.temperature ?? 0.1,
-      maxOutputTokens: request.maxTokens ?? 4096,
+      maxOutputTokens: request.maxTokens ?? 8192,
     };
 
     if (request.jsonSchema) {

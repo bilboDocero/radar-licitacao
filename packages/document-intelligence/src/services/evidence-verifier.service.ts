@@ -50,18 +50,18 @@ export class EvidenceVerifier {
     const verifiedRequirements = requirements.map((req) => {
       const cloned: Requirement = { ...req };
 
-      // Se a IA informou uma página maior que o total do documento, ajusta
-      if (cloned.page && (cloned.page > pageCount || cloned.page < 1)) {
+      // Se a IA informou uma página maior que o total do documento ou menor que 1
+      if (cloned.page !== null && (cloned.page > pageCount || cloned.page < 1)) {
         cloned.notes = `${cloned.notes ? `${cloned.notes} · ` : ''}Página citada (${cloned.page}) excede o total de páginas (${pageCount}).`;
         cloned.page = Math.min(Math.max(1, cloned.page), pageCount);
       }
 
-      // Se não há trecho citado, não pode ser classificado como 'extracted' (fato diretamente extraído)
-      if (!cloned.textExcerpt || cloned.textExcerpt.trim().length < 5) {
+      // Se não há trecho citado, não pode ser classificado como 'extracted' (fato diretamente evidenciado)
+      if (!cloned.textExcerpt || cloned.textExcerpt.trim().length < 8) {
         if (cloned.status === 'extracted') {
           cloned.status = 'inferred';
           cloned.confidence = 'medium';
-          cloned.notes = `${cloned.notes ? `${cloned.notes} · ` : ''}Reclassificado para inferência por ausência de citação textual direta.`;
+          cloned.notes = `${cloned.notes ? `${cloned.notes} · ` : ''}Reclassificado para inferência por ausência de citação textual direta comprobatória.`;
           inferredCount++;
         }
         return cloned;
@@ -69,37 +69,40 @@ export class EvidenceVerifier {
 
       const normalizedExcerpt = normalizeForComparison(cloned.textExcerpt);
 
-      // 1. Procura se o trecho existe no documento completo
+      // 1. Procura se a citação completa e substancial existe no documento extraído
+      // Não aceita prefixo arbitrário curto de 35 caracteres
       const existsInDocument =
         normalizedFullText.includes(normalizedExcerpt) ||
-        (normalizedExcerpt.length > 40 &&
-          normalizedFullText.includes(normalizedExcerpt.slice(0, 35)));
+        (normalizedExcerpt.length > 80 &&
+          normalizedFullText.includes(normalizedExcerpt.slice(0, Math.floor(normalizedExcerpt.length * 0.85))));
 
       if (existsInDocument) {
-        // 2. Tenta localizar a página real onde o trecho ocorre entre as seções
-        let realPage = cloned.page;
+        // 2. Localiza a página real onde o trecho ocorre entre as seções extraídas
+        let foundPage: number | null = null;
         for (const sec of sections) {
           const normSec = normalizeForComparison(sec.content);
-          if (
-            normSec.includes(normalizedExcerpt) ||
-            (normalizedExcerpt.length > 40 && normSec.includes(normalizedExcerpt.slice(0, 35)))
-          ) {
-            realPage = sec.startPage;
+          if (normSec.includes(normalizedExcerpt) || (normalizedExcerpt.length > 80 && normSec.includes(normalizedExcerpt.slice(0, Math.floor(normalizedExcerpt.length * 0.85))))) {
+            foundPage = sec.startPage;
             break;
           }
         }
 
         cloned.status = 'extracted';
         cloned.confidence = 'high';
-        if (realPage && realPage !== cloned.page) {
-          cloned.page = realPage;
+
+        if (foundPage !== null) {
+          if (cloned.page !== null && cloned.page !== foundPage) {
+            cloned.notes = `${cloned.notes ? `${cloned.notes} · ` : ''}Aviso de Auditoria: Trecho localizado na página ${foundPage}, divergindo da página ${cloned.page} indicada pela IA.`;
+          }
+          cloned.page = foundPage;
         }
+
         confirmedCount++;
       } else {
-        // Trecho citado pela LLM NÃO consta no documento extraído (alucinação de citação)
+        // Citação textual da IA NÃO encontrada no documento extraído (alucinação de citação)
         cloned.status = 'inferred';
         cloned.confidence = 'low';
-        cloned.notes = `${cloned.notes ? `${cloned.notes} · ` : ''}Aviso de Auditoria: Trecho citado ("${cloned.textExcerpt.slice(0, 60)}...") não foi localizado literalmente no documento. Reclassificado como inferência pendente de revisão.`;
+        cloned.notes = `${cloned.notes ? `${cloned.notes} · ` : ''}Aviso de Auditoria: Trecho citado ("${cloned.textExcerpt.slice(0, 60)}...") não foi localizado literalmente nos documentos analisados. Reclassificado preventivamente como inferência.`;
         fixedExcerptsCount++;
         inferredCount++;
       }
@@ -113,7 +116,7 @@ export class EvidenceVerifier {
         const normRiskExcerpt = normalizeForComparison(clonedRisk.textExcerpt);
         const exists = normalizedFullText.includes(normRiskExcerpt);
         if (!exists) {
-          clonedRisk.notes = `${clonedRisk.notes ? `${clonedRisk.notes} · ` : ''}Trecho de evidência citado não localizado literalmente no edital.`;
+          clonedRisk.notes = `${clonedRisk.notes ? `${clonedRisk.notes} · ` : ''}Aviso de Auditoria: Trecho de evidência citado não localizado nos documentos analisados.`;
         }
       }
       return clonedRisk;

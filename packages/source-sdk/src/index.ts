@@ -275,11 +275,14 @@ export async function safeDownloadFile(
     // 2. Valida resolução DNS antes do salto
     await assertSafeDestinationDns(validatedUrl.hostname, options.dnsResolver);
 
-    // 3. Executa requisição com redirect manual e timeout
+    // 3. Executa requisição com redirect manual e timeout estendido até o fim do download
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     let response: Response;
+    let buffer: Buffer;
+    let contentType = 'application/octet-stream';
+
     try {
       response = await fetch(validatedUrl.toString(), {
         method: 'GET',
@@ -290,8 +293,45 @@ export async function safeDownloadFile(
         redirect: 'manual',
         signal: controller.signal,
       });
+
+      // 4. Tratamento de redirecionamentos seguros
+      if ([301, 302, 303, 307, 308].includes(response.status)) {
+        clearTimeout(timeoutId);
+        redirectsCount++;
+        if (redirectsCount > maxRedirects) {
+          throw new Error(`Número máximo de redirecionamentos (${maxRedirects}) excedido.`);
+        }
+
+        const locationHeader = response.headers.get('location');
+        if (!locationHeader) {
+          throw new Error(`Redirecionamento HTTP ${response.status} sem cabeçalho Location.`);
+        }
+
+        const nextUrl = new URL(locationHeader, validatedUrl).toString();
+        currentUrl = nextUrl;
+        continue;
+      }
+
+      if (!response.ok) {
+        clearTimeout(timeoutId);
+        throw new Error(`Download falhou com status HTTP ${response.status} (${response.statusText})`);
+      }
+
+      // 5. Validação de Content-Length prévio se informado
+      const contentLength = response.headers.get('content-length');
+      if (contentLength && parseInt(contentLength, 10) > maxBytes) {
+        clearTimeout(timeoutId);
+        throw new Error(
+          `Arquivo excede o limite máximo permitido de ${maxBytes} bytes (recebido: ${contentLength} bytes).`,
+        );
+      }
+
+      contentType = response.headers.get('content-type') || 'application/octet-stream';
+
+      // 6. Leitura do buffer com sinal de timeout ativo
+      const arrayBuffer = await response.arrayBuffer();
+      buffer = Buffer.from(arrayBuffer);
     } catch (err) {
-      clearTimeout(timeoutId);
       if (err instanceof Error && err.name === 'AbortError') {
         throw new Error(`Timeout de download excedido (${timeoutMs}ms) para ${currentUrl}`);
       }
@@ -299,42 +339,6 @@ export async function safeDownloadFile(
     } finally {
       clearTimeout(timeoutId);
     }
-
-    // 4. Tratamento de redirecionamentos seguros
-    if ([301, 302, 303, 307, 308].includes(response.status)) {
-      redirectsCount++;
-      if (redirectsCount > maxRedirects) {
-        throw new Error(`Número máximo de redirecionamentos (${maxRedirects}) excedido.`);
-      }
-
-      const locationHeader = response.headers.get('location');
-      if (!locationHeader) {
-        throw new Error(`Redirecionamento HTTP ${response.status} sem cabeçalho Location.`);
-      }
-
-      // Resolve URL relativa se necessário
-      const nextUrl = new URL(locationHeader, validatedUrl).toString();
-      currentUrl = nextUrl;
-      continue;
-    }
-
-    if (!response.ok) {
-      throw new Error(`Download falhou com status HTTP ${response.status} (${response.statusText})`);
-    }
-
-    // 5. Validação de Content-Length prévio se informado
-    const contentLength = response.headers.get('content-length');
-    if (contentLength && parseInt(contentLength, 10) > maxBytes) {
-      throw new Error(
-        `Arquivo excede o limite máximo permitido de ${maxBytes} bytes (recebido: ${contentLength} bytes).`,
-      );
-    }
-
-    const contentType = response.headers.get('content-type') || 'application/octet-stream';
-
-    // 6. Leitura do buffer com checagem de tamanho em streaming
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
 
     if (buffer.length > maxBytes) {
       throw new Error(

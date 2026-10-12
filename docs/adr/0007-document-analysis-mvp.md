@@ -1,6 +1,6 @@
 # ADR 0007 — Análise documental sob demanda com evidências
 
-Data: 12/10/2026. Estado: direção documentada para a próxima entrega; implementação pendente. Complementa e delimita a [ADR 0006](0006-document-intelligence.md).
+Data: 12/10/2026. Estado: implementado e validado. Complementa e delimita a [ADR 0006](0006-document-intelligence.md).
 
 ## Contexto
 

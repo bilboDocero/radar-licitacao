@@ -136,6 +136,8 @@ export class OpportunityBriefService {
       summary: `Oportunidade com aderência comercial ${fitLevel.toUpperCase()} para o perfil "${profile.name}". ${
         analysis?.summary || procurement.title
       }`,
+      decisionBlocks: (analysis?.decisionBlocks as any) || undefined,
+      documentCoverage: (analysis?.documentCoverage as any) || undefined,
       commercialFit: {
         score: baseScore,
         level: fitLevel,
@@ -173,6 +175,8 @@ export class OpportunityBriefService {
         procurementId,
         status: validated.status,
         summary: validated.summary,
+        decisionBlocks: validated.decisionBlocks || null,
+        documentCoverage: validated.documentCoverage || null,
         commercialFit: validated.commercialFit,
         keyRequirements: validated.keyRequirements,
         risksAndCautions: validated.risksAndCautions,
@@ -191,6 +195,8 @@ export class OpportunityBriefService {
         set: {
           status: validated.status,
           summary: validated.summary,
+          decisionBlocks: validated.decisionBlocks || null,
+          documentCoverage: validated.documentCoverage || null,
           commercialFit: validated.commercialFit,
           keyRequirements: validated.keyRequirements,
           risksAndCautions: validated.risksAndCautions,
@@ -233,6 +239,8 @@ export class OpportunityBriefService {
       procurementId: brief.procurementId,
       status: brief.status,
       summary: brief.summary,
+      decisionBlocks: brief.decisionBlocks || undefined,
+      documentCoverage: brief.documentCoverage || undefined,
       commercialFit: brief.commercialFit,
       keyRequirements: brief.keyRequirements,
       risksAndCautions: brief.risksAndCautions,

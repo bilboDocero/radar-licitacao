@@ -1,6 +1,6 @@
 # MVP de análise documental: resumo de decisão com evidências
 
-Data: 12/10/2026. Estado: **NOT_STARTED** para a integração documental ponta a ponta. Este documento define a próxima entrega; não representa funcionalidade já disponível. Decisão arquitetural: [ADR 0007](../adr/0007-document-analysis-mvp.md).
+Data: 12/10/2026. Estado: **VALIDATED** para a integração documental ponta a ponta com inventário PNCP, download seguro, extração de PDF, 5 blocos de decisão e evidências rastreáveis. Decisão arquitetural: [ADR 0007](../adr/0007-document-analysis-mvp.md).
 
 ## Objetivo e situação atual
 

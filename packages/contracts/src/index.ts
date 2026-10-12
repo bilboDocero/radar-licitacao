@@ -312,9 +312,41 @@ export const executionPlaceSchema = z.object({
 });
 export type ExecutionPlace = z.infer<typeof executionPlaceSchema>;
 
+export const decisionBlocksSchema = z.object({
+  objetoEscopo: z.string().default(''),
+  prazosImportantes: z.string().default(''),
+  exigenciasParticipacao: z.string().default(''),
+  condicoesOperacionais: z.string().default(''),
+  pontosAtencaoPendencias: z.string().default(''),
+});
+export type DecisionBlocks = z.infer<typeof decisionBlocksSchema>;
+
+export const documentCoverageItemSchema = z.object({
+  name: z.string(),
+  documentType: z.string(),
+  url: z.string().optional(),
+  pageCount: z.number().int().default(1),
+  status: z.enum(['read', 'partial', 'unreadable', 'unsupported', 'failed', 'pending']),
+  unreadablePages: z.array(z.number().int()).default([]),
+  notes: z.string().nullable().default(null),
+});
+export type DocumentCoverageItem = z.infer<typeof documentCoverageItemSchema>;
+
+export const documentCoverageSchema = z.object({
+  isComplete: z.boolean().default(true),
+  status: z.enum(['INTEGRAL', 'PARCIAL', 'SEM_DOCUMENTOS', 'FALHA']).default('INTEGRAL'),
+  totalDiscovered: z.number().int().default(0),
+  totalRead: z.number().int().default(0),
+  totalPagesRead: z.number().int().default(0),
+  documents: z.array(documentCoverageItemSchema).default([]),
+  pendingReason: z.string().nullable().default(null),
+});
+export type DocumentCoverage = z.infer<typeof documentCoverageSchema>;
+
 export const tenderRequirementsExtractionSchema = z.object({
   summary: z.string(),
   executionPlace: executionPlaceSchema.nullable().default(null),
+  decisionBlocks: decisionBlocksSchema.optional(),
   requirements: z.array(requirementSchema),
   risks: z.array(riskItemSchema),
   unverifiedPoints: z.array(z.string()),
@@ -328,6 +360,7 @@ export const procurementAIAnalysisSchema = tenderRequirementsExtractionSchema.ex
   model: z.string(),
   provider: z.string(),
   promptVersion: z.string(),
+  documentCoverage: documentCoverageSchema.optional(),
   analyzedAt: z.string(),
 });
 export type ProcurementAIAnalysis = z.infer<typeof procurementAIAnalysisSchema>;
@@ -339,6 +372,8 @@ export const opportunityBriefSchema = z.object({
   profileId: z.string().uuid(),
   status: z.enum(aiAnalysisStatuses),
   summary: z.string(),
+  decisionBlocks: decisionBlocksSchema.optional(),
+  documentCoverage: documentCoverageSchema.optional(),
   commercialFit: z.object({
     score: z.number().min(0).max(100),
     level: z.enum(['high', 'medium', 'low']),

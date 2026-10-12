@@ -60,6 +60,16 @@ describe('Pipeline Documental & Validador de Evidências', () => {
       expect(result.pageCount).toBeGreaterThanOrEqual(1);
       expect(result.unreadablePages).toEqual([]);
     });
+
+    it('lança erro explícito para PDF corrompido sem decodificar como lixo UTF-8', async () => {
+      const fakeDb = {} as any;
+      const service = new DocumentExtractionService(fakeDb);
+
+      const corruptedBuffer = Buffer.from('%PDF-1.4\ncorrupted-binary-without-pdf-xref-table');
+      await expect(
+        service.extractTextFromBuffer(corruptedBuffer, 'edital-corrompido.pdf'),
+      ).rejects.toThrow(/Falha ao extrair PDF.*corrompido/);
+    });
   });
 
   describe('EvidenceVerifier (Validação Rigorosa de Citações e Trechos)', () => {

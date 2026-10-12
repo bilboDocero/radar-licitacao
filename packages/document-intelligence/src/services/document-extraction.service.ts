@@ -40,6 +40,7 @@ export class DocumentExtractionService {
 
   /**
    * Extrai texto página por página a partir de um buffer, com suporte nativo a PDF.
+   * PDFs corrompidos ou ilegíveis geram erro explícito e NUNCA são decodificados como lixo UTF-8.
    */
   async extractTextFromBuffer(
     buffer: Buffer,
@@ -75,11 +76,14 @@ export class DocumentExtractionService {
           isPdf: true,
         };
       } catch (pdfErr) {
-        logger.warn({ err: pdfErr, fileName }, 'Falha no parser de PDF; tentando fallback para decodificação UTF-8');
+        logger.error({ err: pdfErr, fileName }, 'Falha irreversível no parser de PDF: arquivo corrompido ou protegido.');
+        throw new Error(
+          `Falha ao extrair PDF '${fileName}': arquivo inválido, corrompido ou protegido por senha.`,
+        );
       }
     }
 
-    // Fallback para arquivo textual puro (TXT, HTML, JSON)
+    // Processamento de arquivo textual genuíno (TXT, HTML, JSON)
     const text = buffer.toString('utf-8');
     const pageCount = Math.max(1, Math.ceil(text.length / 2500));
     return {

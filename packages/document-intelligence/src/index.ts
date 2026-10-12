@@ -8,3 +8,4 @@ export * from './services/document-extraction.service.js';
 export * from './services/procurement-analyzer.service.js';
 export * from './services/opportunity-brief.service.js';
 export * from './services/evidence-verifier.service.js';
+export * from './services/pncp-discovery.service.js';

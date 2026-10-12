@@ -19,6 +19,8 @@ import type {
   Requirement,
   RiskItem,
   ExecutionPlace,
+  DecisionBlocks,
+  DocumentCoverage,
 } from '@radar/contracts';
 const id = () => uuid('id').primaryKey().defaultRandom();
 const created = () => timestamp('created_at', { withTimezone: true }).notNull().defaultNow();
@@ -349,6 +351,8 @@ export const procurementAIAnalyses = pgTable(
     promptVersion: text('prompt_version').notNull(),
     summary: text('summary').notNull(),
     executionPlace: jsonb('execution_place').$type<ExecutionPlace>(),
+    decisionBlocks: jsonb('decision_blocks').$type<DecisionBlocks>(),
+    documentCoverage: jsonb('document_coverage').$type<DocumentCoverage>(),
     requirements: jsonb('requirements').$type<Requirement[]>().notNull(),
     risks: jsonb('risks').$type<RiskItem[]>().notNull(),
     unverifiedPoints: jsonb('unverified_points').$type<string[]>().notNull(),
@@ -379,6 +383,8 @@ export const opportunityBriefs = pgTable(
       .references(() => procurements.id, { onDelete: 'cascade' }),
     status: text('status').$type<AIAnalysisStatus>().notNull().default('PENDING'),
     summary: text('summary').notNull(),
+    decisionBlocks: jsonb('decision_blocks').$type<DecisionBlocks>(),
+    documentCoverage: jsonb('document_coverage').$type<DocumentCoverage>(),
     commercialFit: jsonb('commercial_fit').notNull(),
     keyRequirements: jsonb('key_requirements').$type<Requirement[]>().notNull(),
     risksAndCautions: jsonb('risks_and_cautions').$type<RiskItem[]>().notNull(),

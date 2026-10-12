@@ -184,6 +184,19 @@ export class MockAIProvider implements AIProvider {
           municipality: '3550308',
           details: 'Entrega na sede do almoxarifado central.',
         },
+        decisionBlocks: {
+          objetoEscopo: isOffice
+            ? 'Aquisição de suprimentos de tecnologia, 50 computadores e 10 impressoras multifuncionais.'
+            : 'Fornecimento de bens e serviços comuns especificados no edital.',
+          prazosImportantes:
+            'Envio de propostas até a data de abertura. Impugnação em até 3 dias úteis antes da sessão.',
+          exigenciasParticipacao:
+            'Registro na Junta Comercial, SICAF ativo, CND Federal, FGTS e 1 atestado de capacidade técnica.',
+          condicoesOperacionais:
+            'Entrega em até 10 dias úteis no almoxarifado central. Pagamento em até 30 dias após liquidação.',
+          pontosAtencaoPendencias:
+            'Exigência de atestado único com características compatíveis. Multa de 0,5% ao dia por atraso.',
+        },
         requirements,
         risks,
         unverifiedPoints: [
@@ -211,6 +224,25 @@ export class MockAIProvider implements AIProvider {
         status: 'COMPLETED',
         summary:
           'Oportunidade de alta compatibilidade comercial com o portfólio cadastrado. Documentação de habilitação acessível e prazo adequado para preparação da proposta.',
+        decisionBlocks: {
+          objetoEscopo: 'Aquisição de suprimentos de tecnologia e equipamentos de escritório.',
+          prazosImportantes: 'Propostas abertas. Prazo de impugnação em até 3 dias úteis.',
+          exigenciasParticipacao: 'Apresentação de registro comercial, SICAF e certidões negativas.',
+          condicoesOperacionais: 'Entrega na sede administrativa em até 10 dias úteis.',
+          pontosAtencaoPendencias: 'Conferir atestado de capacidade técnica prévio.',
+        },
+        documentCoverage: {
+          isComplete: true,
+          status: 'INTEGRAL',
+          totalDiscovered: 2,
+          totalRead: 2,
+          totalPagesRead: 16,
+          documents: [
+            { name: 'Edital.pdf', documentType: 'Edital', pageCount: 12, status: 'read', unreadablePages: [], notes: null },
+            { name: 'Termo_de_Referencia.pdf', documentType: 'Termo de Referência', pageCount: 4, status: 'read', unreadablePages: [], notes: null },
+          ],
+          pendingReason: null,
+        },
         commercialFit: {
           score: 85,
           level: 'high',
