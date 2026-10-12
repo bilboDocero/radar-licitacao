@@ -33,6 +33,8 @@ Chamadas podem ocorrer sob demanda HTTP ou dentro do processamento do matching. 
 
 ## Cache e reanálise entregues
 
+Atualização de 12/10/2026: o cliente não pode mais forçar reanálise; botão e endpoint POST foram removidos. A opção interna de força descrita abaixo não é exposta ao assinante. Atualização de briefs é sob demanda, sem propagação ativa, e a prevenção de chamadas concorrentes ainda é pendente.
+
 A análise concluída só é reutilizada se versão da licitação, provedor, modelo e versão de prompt coincidirem. Troca de mock para Gemini gera novo resultado; reanálise explícita força chamada. Briefs antigos são atualizados quando a análise compartilhada tem data mais recente, preservando organização e perfil.
 
 Isso não implementa ainda atualização por hash do conjunto documental ou por mudança de perfil. A restrição única no banco evita duplicidade de registros, mas não impede chamadas concorrentes ao modelo.

@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
   Param,
   Inject,
   Injectable,
@@ -24,7 +23,7 @@ import {
   OpportunityBriefService,
 } from '@radar/document-intelligence';
 import { DatabaseService } from '../../common/database.module.js';
-import { Tenant, Manage, PlatformAdmin } from '../../common/http.js';
+import { Tenant, PlatformAdmin } from '../../common/http.js';
 import { TenancyModule, TenantGuard } from '../tenancy/tenancy.module.js';
 
 @Injectable()
@@ -100,13 +99,6 @@ export class DocumentIntelligenceController {
   @Get('procurements/:id/brief')
   getBrief(@Tenant() tenant: TenantContext, @Param('id') id: string) {
     return this.service.getOpportunityBrief(tenant.organizationId, id);
-  }
-
-  @UseGuards(TenantGuard)
-  @Manage()
-  @Post('procurements/:id/analyze')
-  triggerAnalysis(@Param('id') id: string) {
-    return this.service.analyzer.analyze(id, undefined, true);
   }
 
   @PlatformAdmin()

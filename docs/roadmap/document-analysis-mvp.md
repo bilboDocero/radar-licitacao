@@ -85,6 +85,8 @@ A API agenda o trabalho e retorna seu estado; não espera a chamada ao modelo. C
 
 ## Controle de custo
 
+- Não oferecer reanálise forçada ao cliente. Consulta deve reutilizar o resultado compartilhado. Uma futura reexecução operacional exige controle administrativo e invalidação/atualização dos briefs de todas as organizações consumidoras; as referências a reanálise manual abaixo se limitam a esse futuro fluxo operacional, não a uma opção do assinante.
+
 - Primeiro incremento sob demanda. Análise automática após matching permanece fora deste escopo e deve ser habilitada somente após medição; o comportamento atual do worker precisará ser ajustado.
 - Limitar documentos, bytes, páginas/trechos, entrada e saída de tokens, concorrência, tentativas e frequência de reanálise manual. Exibir cobertura parcial quando um limite impedir o processamento.
 - Reservar orçamento antes das chamadas concorrentes e conciliar com consumo real. Registrar custo estimado como estimativa, sem tratá-lo como faturamento do provedor.

@@ -2,6 +2,12 @@
 
 Este documento consolida os comandos de validação da plataforma Radar de Licitações Públicas e o histórico de resultados observados.
 
+## Remoção de reanálise pelo cliente — 12/10/2026
+
+- Removidos botão e endpoint POST de reanálise. O estado vazio permite apenas tentar carregar o brief via GET, reutilizando o cache compatível.
+- `pnpm test`: 74 testes aprovados; `pnpm typecheck` e `pnpm build`: aprovados. ESLint nos arquivos alterados: zero erros e dois avisos de formatação Vue.
+- A verificação adicional no navegador foi recusada pelo usuário e não foi executada. Não se afirma validação E2E desta remoção. Nenhum schema foi alterado e a integração em banco não foi repetida.
+
 ## Preparação documental da próxima entrega — 12/10/2026
 
 Atualizados roadmap, arquitetura e estado atual, com ADR 0007 e plano específico do MVP documental. Esta entrega é apenas documental; não conecta PDFs ao Gemini nem modifica contratos/schema. Os testes anteriores abaixo não validam a evolução planejada. Sua matriz de homologação está em [análise documental MVP](../roadmap/document-analysis-mvp.md#validação-de-qualidade-e-liberação).

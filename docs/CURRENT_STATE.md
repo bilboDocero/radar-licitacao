@@ -25,6 +25,12 @@
 
 ## 2. Resumo executivo
 
+### Reanálise e cobertura geográfica — 12/10/2026
+
+Removidos o botão de reanálise e o endpoint público `POST /procurements/:id/analyze`. Consulta ou tentativa de carregar usa o cache compartilhado; não existe mais reanálise forçada pelo cliente. O mecanismo interno de força permanece técnico, sem rota exposta. Atualizações compartilhadas ainda regeneram briefs sob demanda pela data da análise; não há propagação proativa para todas as empresas nem lock contra inferências concorrentes.
+
+Matching e alertas usam cobertura nacional/UF/município do perfil da organização. Local de execução canônico tem prioridade; sem ele, usa-se a sede do órgão como aproximação identificada. O normalizador PNCP atual deixa execução nula; localização inferida pela IA não atualiza esses campos nem dispara novo matching. Alertas são privados por organização e deduplicados por organização/licitação/versão; notificações antigas não são refiltradas conforme alterações posteriores de cobertura.
+
 ### Próxima evolução documental — planejada em 12/10/2026
 
 Estado da integração PDF ponta a ponta: **NOT_STARTED**. O [escopo mínimo de análise documental](roadmap/document-analysis-mvp.md) e a [ADR 0007](adr/0007-document-analysis-mvp.md) definem resumo de decisão com evidências, cinco blocos, edital/termo de referência em PDF textual, processamento inicialmente sob demanda, fila dedicada e controle de custo. OCR, tabelas complexas, chat e comprovação de habilitação ficam fora do primeiro incremento.
