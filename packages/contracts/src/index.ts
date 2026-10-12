@@ -42,6 +42,71 @@ export const organizationInput = z
       .optional(),
   })
   .strict();
+export const updateOrganizationInput = z
+  .object({
+    name: z.string().trim().min(3).max(160).optional(),
+    cnpj: z
+      .string()
+      .trim()
+      .transform((val) => val.replace(/\D/g, ''))
+      .refine((val) => val.length === 14, {
+        message: 'CNPJ deve conter 14 dígitos numéricos',
+      })
+      .optional(),
+  })
+  .strict();
+export type UpdateOrganizationInput = z.infer<typeof updateOrganizationInput>;
+
+export const organizationRegistryViewSchema = z.object({
+  cnpj: z.string(),
+  legalName: z.string().nullable(),
+  tradeName: z.string().nullable(),
+
+  registrationStatus: z.string().nullable(),
+  openedAt: z.string().nullable(),
+  establishmentType: z.string().nullable(),
+
+  legalNature: z.string().nullable(),
+  companySize: z.string().nullable(),
+  shareCapital: z.string().nullable(),
+
+  primaryActivity: z
+    .object({
+      code: z.string(),
+      description: z.string(),
+    })
+    .nullable(),
+
+  secondaryActivities: z.array(
+    z.object({
+      code: z.string(),
+      description: z.string(),
+    }),
+  ),
+
+  address: z.object({
+    postalCode: z.string().nullable(),
+    street: z.string().nullable(),
+    number: z.string().nullable(),
+    complement: z.string().nullable(),
+    neighborhood: z.string().nullable(),
+    city: z.string().nullable(),
+    state: z.string().nullable(),
+    country: z.string().nullable(),
+  }),
+
+  email: z.string().nullable(),
+  phone: z.string().nullable(),
+
+  simpleTaxRegime: z.boolean().nullable(),
+  mei: z.boolean().nullable(),
+
+  source: z.enum(['brasilapi', 'cnpjws', 'mock']),
+  fetchedAt: z.string(),
+  sourceUpdatedAt: z.string().nullable(),
+  isCached: z.boolean().optional(),
+});
+export type OrganizationRegistryView = z.infer<typeof organizationRegistryViewSchema>;
 export const coverageSchema = z
   .object({
     national: z.boolean().default(false),

@@ -1,6 +1,8 @@
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   organizationInput,
+  updateOrganizationInput,
+  organizationRegistryViewSchema,
   profileInput,
   sourceRequestInput,
   alertPreferenceInput,
@@ -13,6 +15,8 @@ import {
 export const inputSchemas = Object.fromEntries(
   Object.entries({
     OrganizationInput: organizationInput,
+    UpdateOrganizationInput: updateOrganizationInput,
+    OrganizationRegistryView: organizationRegistryViewSchema,
     ProfileInput: profileInput,
     SourceRequestInput: sourceRequestInput,
     AlertPreferenceInput: alertPreferenceInput,

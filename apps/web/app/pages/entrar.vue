@@ -7,12 +7,27 @@ useSeoMeta({ title: 'Acesse sua conta' });
   <h1 class="mt-4">Vamos encontrar<br />novas possibilidades.</h1>
   <p>Acesse sua conta para acompanhar as oportunidades da sua empresa.</p>
   <UAlert
-    v-if="$route.query.erro"
+    v-if="$route.query.erro === 'email_nao_verificado'"
+    color="warning"
+    title="E-mail ainda não confirmado"
+    description="Confirme seu e-mail para ativar a conta. Em ambiente local, acesse o Mailpit em http://localhost:8025 e clique no link de ativação recebido."
+    class="mt-5"
+  />
+  <UAlert
+    v-else-if="$route.query.erro === 'servico_indisponivel'"
+    color="error"
+    title="Serviço temporariamente indisponível"
+    description="Não foi possível comunicar com a API do Radar. Verifique se os serviços locais estão rodando."
+    class="mt-5"
+  />
+  <UAlert
+    v-else-if="$route.query.erro"
     color="error"
     title="Não foi possível entrar"
-    description="Tente novamente e confirme a verificação do seu e-mail."
+    description="A sessão expirou, foi cancelada ou ocorreu um conflito de credenciais. Tente entrar novamente."
     class="mt-5"
-  /><UButton
+  />
+  <UButton
     to="/auth/login"
     external
     block
@@ -21,10 +36,14 @@ useSeoMeta({ title: 'Acesse sua conta' });
     trailing-icon="i-lucide-arrow-right"
     >Entrar na minha conta</UButton
   >
-  <p class="mt-6 text-center">
-    Ainda não tem conta?
-    <NuxtLink to="/cadastro" class="text-emerald-700 font-semibold">Criar conta</NuxtLink>
-  </p>
+  <div class="mt-4 flex items-center justify-between text-xs text-slate-400">
+    <NuxtLink to="/auth/logout" external class="hover:text-slate-200 underline">
+      Limpar sessão anterior do Keycloak
+    </NuxtLink>
+    <NuxtLink to="/cadastro" class="text-emerald-700 font-semibold hover:underline">
+      Criar nova conta
+    </NuxtLink>
+  </div>
   <NuxtLink to="/recuperar-senha" class="block text-center mt-4 text-sm text-slate-500"
     >Esqueci minha senha</NuxtLink
   >

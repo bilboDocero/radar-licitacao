@@ -38,9 +38,7 @@ const links = computed(() =>
         ],
 );
 async function logout() {
-  await $fetch('/api/logout', { method: 'POST' });
-  await useUserSession().clear();
-  await navigateTo('/');
+  await navigateTo('/auth/logout', { external: true });
 }
 function switchOrganization(event: Event) {
   radar.activeOrganization.value = (event.target as HTMLSelectElement).value;

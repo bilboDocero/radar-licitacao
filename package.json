@@ -22,6 +22,7 @@
     "db:seed": "corepack pnpm --filter @radar/database seed",
     "collect": "corepack pnpm --filter @radar/collector collect",
     "smoke:ai": "tsx scripts/smoke-ai.mjs",
+    "smoke:registry": "tsx scripts/smoke-registry.mjs",
     "health": "node scripts/health.mjs"
   },
   "devDependencies": {

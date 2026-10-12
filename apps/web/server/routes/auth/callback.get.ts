@@ -38,8 +38,17 @@ export default defineEventHandler(async (event) => {
     });
     return sendRedirect(event, '/app');
   } catch (error) {
-    console.error('OIDC callback failed', error instanceof Error ? error.message : 'unknown');
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('OIDC callback failed:', msg);
     await clearUserSession(event);
-    return sendRedirect(event, '/entrar?erro=autenticacao');
+
+    let erroCode = 'autenticacao';
+    if (msg.includes('Verifique seu e-mail')) {
+      erroCode = 'email_nao_verificado';
+    } else if (msg.includes('fetch failed')) {
+      erroCode = 'servico_indisponivel';
+    }
+
+    return sendRedirect(event, `/entrar?erro=${erroCode}`);
   }
 });

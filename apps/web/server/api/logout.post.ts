@@ -4,5 +4,9 @@ export default defineEventHandler(async (event) => {
   const session = await getUserSession(event);
   if (session.secure?.sid) await sessionStore().del(`session:${session.secure.sid}`);
   await clearUserSession(event);
-  return { success: true };
+
+  const runtime = useRuntimeConfig();
+  const logoutUrl = `${runtime.oidcIssuer}/protocol/openid-connect/logout?post_logout_redirect_uri=${encodeURIComponent(runtime.webOrigin + '/entrar')}&client_id=${encodeURIComponent(runtime.oidcClientId)}`;
+
+  return { success: true, logoutUrl };
 });

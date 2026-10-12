@@ -71,6 +71,7 @@
 - Nunca transformar sugestões de fontes de usuários em chamadas HTTP dinâmicas ou desprotegidas contra SSRF. Toda chamada externa a documentos deve utilizar `safeDownloadFile` / `assertApprovedUrl` com checagem de DNS e bloqueio estrito de IPs privados/loopback/cloud metadata.
 - Toda citação de evidência documental da IA deve ser auditada deterministicamente com o `EvidenceVerifier`, garantindo que trechos alucinados sejam rebaixados para `inferred`.
 - Manter segregação estrita de hashes: hash de bytes do arquivo (`documentHash`), hash de texto normalizado (`extractedTextHash`) e chave de análise em cache.
+- O enriquecimento cadastral de empresas deve ocorrer exclusivamente pelo backend (`CompanyRegistryService`), utilizando BrasilAPI como fonte primária e CNPJ.ws como fallback controlado (máx. 3 req/min no Redis) com cache de 7 dias. O contrato normalizado `OrganizationRegistryView` é de leitura e não altera o perfil comercial ou regras de matching.
 - Nunca simular pagamentos ou faturamento ativo enquanto não houver integração formal com gateway homologado.
 - Respeitar os limites do MVP definidos no roadmap.
 - Preservar a codificação UTF-8 em todos os arquivos. Não formatar os anexos `estrategia.md` e `memoria.md`.

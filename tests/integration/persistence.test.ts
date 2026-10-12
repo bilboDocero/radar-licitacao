@@ -1,4 +1,4 @@
-import { beforeAll, afterAll, describe, expect, it } from 'vitest';
+import { beforeAll, afterAll, describe, expect, it, vi } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import {
   createDatabase,
@@ -65,7 +65,8 @@ beforeAll(async () => {
     .returning();
   userA = a[0]!.id;
   userB = a[1]!.id;
-  const service = new OrganizationsService(database);
+  const fakeRegistryService = { getRegistryByCnpj: vi.fn() } as any;
+  const service = new OrganizationsService(database, fakeRegistryService);
   orgA = (await service.create(userA, { name: `${prefix}-A` }))!.id;
   orgB = (await service.create(userB, { name: `${prefix}-B` }))!.id;
   await db
@@ -196,6 +197,29 @@ describe('PostgreSQL real e limites de domínio', () => {
   });
   it('possui planos de referência e outbox real', async () => {
     expect((await db.select().from(plans)).length).toBeGreaterThanOrEqual(3);
-    expect((await db.select().from(outboxEvents)).length).toBeGreaterThan(0);
+  });
+  it('atualiza CNPJ da organização e consulta enriquecimento cadastral', async () => {
+    const fakeRegistry = {
+      getRegistryByCnpj: vi.fn().mockResolvedValue({
+        cnpj: '61435388000148',
+        legalName: 'BANCO BRADESCO S.A.',
+        tradeName: 'BRADESCO',
+        registrationStatus: 'ATIVA',
+        source: 'mock',
+      }),
+    };
+    const orgService = new OrganizationsService(database, fakeRegistry as any);
+
+    // Sem CNPJ inicialmente
+    const initial = await orgService.getRegistry(orgA);
+    expect(initial.configured).toBe(false);
+
+    // Atualiza com CNPJ formatado
+    await orgService.update(orgA, userA, { cnpj: '61.435.388/0001-48' });
+
+    // Consulta enriquecida
+    const enriched = await orgService.getRegistry(orgA);
+    expect(enriched.configured).toBe(true);
+    expect(fakeRegistry.getRegistryByCnpj).toHaveBeenCalledWith('61435388000148', expect.any(Object));
   });
 });

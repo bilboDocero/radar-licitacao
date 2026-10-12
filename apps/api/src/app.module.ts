@@ -2,9 +2,8 @@ import { Controller, Get, Inject, Module, ServiceUnavailableException } from '@n
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { sql } from 'drizzle-orm';
-import { Redis } from 'ioredis';
-import { environment } from '@radar/config';
 import { DatabaseModule, DatabaseService } from './common/database.module.js';
+import { RedisModule, RedisService } from './common/redis.module.js';
 import { Public } from './common/http.js';
 import { IdentityModule, IdentityGuard } from './modules/identity/identity.module.js';
 import { OrganizationsModule } from './modules/organizations/organizations.module.js';
@@ -22,27 +21,24 @@ import { AuditModule } from './modules/audit/audit.module.js';
 import { DocumentIntelligenceModule } from './modules/document-intelligence/document-intelligence.module.js';
 @Controller('health')
 class HealthController {
-  constructor(@Inject(DatabaseService) private readonly database: DatabaseService) {}
+  constructor(
+    @Inject(DatabaseService) private readonly database: DatabaseService,
+    @Inject(RedisService) private readonly redis: RedisService,
+  ) {}
   @Public() @Get() async health() {
-    const redis = new Redis(environment().REDIS_URL, {
-      lazyConnect: true,
-      maxRetriesPerRequest: 1,
-      connectTimeout: 2000,
-    });
     try {
       await this.database.db.execute(sql`select 1`);
-      await redis.ping();
+      await this.redis.ping();
       return { status: 'ok', database: 'ok', redis: 'ok' };
     } catch {
       throw new ServiceUnavailableException('Dependência indisponível');
-    } finally {
-      redis.disconnect();
     }
   }
 }
 @Module({
   imports: [
     DatabaseModule,
+    RedisModule,
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 120 }]),
     IdentityModule,
     OrganizationsModule,

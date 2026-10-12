@@ -8,6 +8,7 @@ export default defineEventHandler(async (event) => {
   await setUserSession(event, {
     secure: { oauth: { verifier, state, nonce, expiresAt: Date.now() + 600000 } },
   });
+  const isRegister = getQuery(event).register === 'true';
   const url = oidc.buildAuthorizationUrl(config, {
     redirect_uri: `${runtime.webOrigin}/auth/callback`,
     scope: 'openid email profile',
@@ -15,7 +16,7 @@ export default defineEventHandler(async (event) => {
     code_challenge_method: 'S256',
     state,
     nonce,
-    ...(getQuery(event).register === 'true' ? { prompt: 'create' } : {}),
+    prompt: isRegister ? 'create' : 'login',
   });
   return sendRedirect(event, url.href);
 });
