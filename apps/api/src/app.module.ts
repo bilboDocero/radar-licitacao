@@ -19,6 +19,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { PartnersModule } from './modules/partners/partners.module.js';
 import { AuditModule } from './modules/audit/audit.module.js';
 import { DocumentIntelligenceModule } from './modules/document-intelligence/document-intelligence.module.js';
+import { DebugModule } from './modules/debug/debug.module.js';
 @Controller('health')
 class HealthController {
   constructor(
@@ -54,6 +55,7 @@ class HealthController {
     PartnersModule,
     AuditModule,
     DocumentIntelligenceModule,
+    DebugModule,
   ],
   controllers: [HealthController],
   providers: [

@@ -28,6 +28,14 @@ export const envSchema = z.object({
     .transform((v) => v === 'true'),
   COLLECTION_INTERVAL_MS: z.coerce.number().min(60000).default(3600000),
   PNCP_LOOKBACK_DAYS: z.coerce.number().int().min(1).max(30).default(2),
+  DEBUG_MODE: z
+    .string()
+    .optional()
+    .default('false')
+    .transform((v) => {
+      const val = (v || process.env.DEBUG || 'false').toLowerCase().trim();
+      return val === 'true' || val === 'on' || val === '1';
+    }),
   AI_ENABLED: z
     .enum(['true', 'false'])
     .default('false')

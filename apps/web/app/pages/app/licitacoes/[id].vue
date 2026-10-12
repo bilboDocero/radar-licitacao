@@ -342,7 +342,7 @@ async function save() {
 
         <div v-else class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">
           <p class="mb-3">Ainda não há análise documental gerada para este edital.</p>
-          <UButton size="sm" color="primary" @click="refreshBrief">
+          <UButton size="sm" color="primary" @click="() => refreshBrief()">
             Carregar análise documental
           </UButton>
         </div>

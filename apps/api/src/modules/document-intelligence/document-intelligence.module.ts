@@ -22,6 +22,7 @@ import {
   ProcurementAnalyzer,
   OpportunityBriefService,
 } from '@radar/document-intelligence';
+import type { MockFailureMode } from '@radar/document-intelligence';
 import { DatabaseService } from '../../common/database.module.js';
 import { Tenant, PlatformAdmin } from '../../common/http.js';
 import { TenancyModule, TenantGuard } from '../tenancy/tenancy.module.js';
@@ -29,6 +30,7 @@ import { TenancyModule, TenantGuard } from '../tenancy/tenancy.module.js';
 @Injectable()
 export class DocumentIntelligenceService {
   readonly router: AIModelRouter;
+  readonly mockProvider: MockAIProvider;
   readonly usageTracker: AIUsageTracker;
   readonly extractionService: DocumentExtractionService;
   readonly analyzer: ProcurementAnalyzer;
@@ -38,8 +40,9 @@ export class DocumentIntelligenceService {
     const env = environment();
     this.usageTracker = new AIUsageTracker(this.database.db);
 
+    this.mockProvider = new MockAIProvider();
     const providers = [
-      new MockAIProvider(),
+      this.mockProvider,
       new OpenAIProvider(env.OPENAI_API_KEY),
       new GeminiProvider(env.GEMINI_API_KEY),
     ];
@@ -48,6 +51,10 @@ export class DocumentIntelligenceService {
     this.extractionService = new DocumentExtractionService(this.database.db);
     this.analyzer = new ProcurementAnalyzer(this.database.db, this.router, this.extractionService);
     this.briefService = new OpportunityBriefService(this.database.db, this.analyzer);
+  }
+
+  setMockFailureMode(mode: MockFailureMode) {
+    this.mockProvider.setFailureMode(mode);
   }
 
   async getProcurementAnalysis(procurementId: string) {

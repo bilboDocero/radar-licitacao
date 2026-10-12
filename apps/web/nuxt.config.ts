@@ -14,6 +14,13 @@ export default defineNuxtConfig({
     oidcInternalOrigin: '',
     webOrigin: 'http://localhost:3000',
     session: { maxAge: 28800, cookie: { sameSite: 'lax', httpOnly: true } },
+    public: {
+      debugMode:
+        process.env.DEBUG_MODE === 'true' ||
+        process.env.DEBUG_MODE === 'on' ||
+        process.env.DEBUG === 'on' ||
+        process.env.DEBUG === 'true',
+    },
   },
   app: {
     head: {

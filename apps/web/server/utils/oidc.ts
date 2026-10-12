@@ -30,6 +30,7 @@ export function oidcConfiguration() {
 interface Tokens {
   accessToken: string;
   refreshToken?: string;
+  idToken?: string;
   expiresAt: number;
 }
 const refreshing = new Map<string, Promise<Tokens>>();

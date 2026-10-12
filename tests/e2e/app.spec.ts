@@ -40,3 +40,8 @@ test('layout público responsivo', async ({ page }) => {
   expect(overflow).toBe(false);
   await page.screenshot({ path: '.local/mobile.png', fullPage: true });
 });
+
+test('painel de debug exige autenticação', async ({ page }) => {
+  await page.goto('/app/debug');
+  await expect(page).toHaveURL(/\/entrar/);
+});

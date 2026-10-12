@@ -2,42 +2,50 @@
 const props = defineProps<{ area?: 'app' | 'admin' | 'parceiro' }>();
 const { user } = useUserSession();
 const radar = useRadar();
+const config = useRuntimeConfig();
+const debugMode = computed(() => Boolean(config.public.debugMode));
 const open = ref(false);
-const links = computed(() =>
-  props.area === 'admin'
-    ? [
-        ['/admin', 'Visão geral', 'layout-dashboard'],
-        ['/admin/empresas', 'Empresas', 'building-2'],
-        ['/admin/parceiros', 'Parceiros', 'handshake'],
-        ['/admin/fontes', 'Fontes', 'radio-tower'],
-        ['/admin/solicitacoes', 'Solicitações', 'inbox'],
-        ['/admin/coletores', 'Coletores', 'activity'],
-        ['/admin/licitacoes', 'Licitações', 'files'],
-        ['/admin/inteligencia-artificial', 'Inteligência Artificial', 'sparkles'],
-        ['/admin/planos', 'Planos', 'credit-card'],
-        ['/admin/auditoria', 'Auditoria', 'shield-check'],
-      ]
-    : props.area === 'parceiro'
-      ? [
-          ['/parceiro', 'Visão comercial', 'layout-dashboard'],
-          ['/parceiro/clientes', 'Meus clientes', 'building-2'],
-          ['/parceiro/convites', 'Convites', 'mail-plus'],
-          ['/parceiro/assinaturas', 'Assinaturas', 'credit-card'],
-          ['/parceiro/configuracoes', 'Marca e conta', 'settings'],
-        ]
-      : [
-          ['/app', 'Visão geral', 'layout-dashboard'],
-          ['/app/radar', 'Radar de oportunidades', 'radar'],
-          ['/app/favoritos', 'Favoritos', 'bookmark'],
-          ['/app/alertas', 'Alertas', 'bell'],
-          ['/app/perfil-comercial', 'Perfil comercial', 'sliders-horizontal'],
-          ['/app/cobertura', 'Minha cobertura', 'map'],
-          ['/app/fontes', 'Fontes monitoradas', 'radio-tower'],
-          ['/app/assinatura', 'Minha assinatura', 'credit-card'],
-          ['/app/empresa', 'Dados da empresa', 'building-2'],
-          ['/app/configuracoes', 'Configurações', 'settings'],
-        ],
-);
+const links = computed(() => {
+  if (props.area === 'admin') {
+    return [
+      ['/admin', 'Visão geral', 'layout-dashboard'],
+      ['/admin/empresas', 'Empresas', 'building-2'],
+      ['/admin/parceiros', 'Parceiros', 'handshake'],
+      ['/admin/fontes', 'Fontes', 'radio-tower'],
+      ['/admin/solicitacoes', 'Solicitações', 'inbox'],
+      ['/admin/coletores', 'Coletores', 'activity'],
+      ['/admin/licitacoes', 'Licitações', 'files'],
+      ['/admin/inteligencia-artificial', 'Inteligência Artificial', 'sparkles'],
+      ['/admin/planos', 'Planos', 'credit-card'],
+      ['/admin/auditoria', 'Auditoria', 'shield-check'],
+    ];
+  }
+  if (props.area === 'parceiro') {
+    return [
+      ['/parceiro', 'Visão comercial', 'layout-dashboard'],
+      ['/parceiro/clientes', 'Meus clientes', 'building-2'],
+      ['/parceiro/convites', 'Convites', 'mail-plus'],
+      ['/parceiro/assinaturas', 'Assinaturas', 'credit-card'],
+      ['/parceiro/configuracoes', 'Marca e conta', 'settings'],
+    ];
+  }
+  const appLinks = [
+    ['/app', 'Visão geral', 'layout-dashboard'],
+    ['/app/radar', 'Radar de oportunidades', 'radar'],
+    ['/app/favoritos', 'Favoritos', 'bookmark'],
+    ['/app/alertas', 'Alertas', 'bell'],
+    ['/app/perfil-comercial', 'Perfil comercial', 'sliders-horizontal'],
+    ['/app/cobertura', 'Minha cobertura', 'map'],
+    ['/app/fontes', 'Fontes monitoradas', 'radio-tower'],
+    ['/app/assinatura', 'Minha assinatura', 'credit-card'],
+    ['/app/empresa', 'Dados da empresa', 'building-2'],
+    ['/app/configuracoes', 'Configurações', 'settings'],
+  ];
+  if (debugMode.value) {
+    appLinks.push(['/app/debug', 'Debug & Background', 'terminal']);
+  }
+  return appLinks;
+});
 async function logout() {
   await navigateTo('/auth/logout', { external: true });
 }

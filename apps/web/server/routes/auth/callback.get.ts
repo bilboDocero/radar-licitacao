@@ -26,6 +26,7 @@ export default defineEventHandler(async (event) => {
       JSON.stringify({
         accessToken: tokens.access_token,
         refreshToken: tokens.refresh_token,
+        idToken: tokens.id_token,
         expiresAt: Date.now() + (tokens.expires_in || 300) * 1000,
       }),
       'EX',
