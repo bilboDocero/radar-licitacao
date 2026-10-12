@@ -96,6 +96,8 @@ afterAll(async () => {
   await db.delete(savedProcurements).where(inArray(savedProcurements.organizationId, ids));
   await db.delete(auditLogs).where(inArray(auditLogs.organizationId, ids));
   if (procurementId) {
+    const { aiUsageRecords } = await import('../../packages/database/src/index.js');
+    await db.delete(aiUsageRecords).where(eq(aiUsageRecords.procurementId, procurementId));
     await db
       .delete(procurementVersions)
       .where(eq(procurementVersions.procurementId, procurementId));

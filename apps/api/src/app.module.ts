@@ -19,6 +19,7 @@ import { BillingModule } from './modules/billing/billing.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { PartnersModule } from './modules/partners/partners.module.js';
 import { AuditModule } from './modules/audit/audit.module.js';
+import { DocumentIntelligenceModule } from './modules/document-intelligence/document-intelligence.module.js';
 @Controller('health')
 class HealthController {
   constructor(@Inject(DatabaseService) private readonly database: DatabaseService) {}
@@ -56,6 +57,7 @@ class HealthController {
     NotificationsModule,
     PartnersModule,
     AuditModule,
+    DocumentIntelligenceModule,
   ],
   controllers: [HealthController],
   providers: [

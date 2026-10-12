@@ -6,6 +6,8 @@ import {
   alertPreferenceInput,
   partnerInput,
   invitationInput,
+  procurementAIAnalysisSchema,
+  opportunityBriefSchema,
 } from './index.js';
 export const inputSchemas = Object.fromEntries(
   Object.entries({
@@ -15,6 +17,8 @@ export const inputSchemas = Object.fromEntries(
     AlertPreferenceInput: alertPreferenceInput,
     PartnerInput: partnerInput,
     InvitationInput: invitationInput,
+    ProcurementAIAnalysis: procurementAIAnalysisSchema,
+    OpportunityBrief: opportunityBriefSchema,
   }).map(([name, schema]) => [
     name,
     zodToJsonSchema(schema, { target: 'openApi3', $refStrategy: 'none' }),

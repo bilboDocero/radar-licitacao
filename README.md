@@ -68,11 +68,11 @@ A API externa pode responder 429 ou ficar indisponível. Nesse caso, o job falha
 
 ## Organização
 
-- `apps/web`: Nuxt, páginas públicas/privadas, layouts, BFF e sessão.
-- `apps/api`: módulos de identidade, organizações, perfis, catálogo, planos, parceiros e administração.
+- `apps/web`: Nuxt, páginas públicas/privadas, layouts, BFF, sessão e Opportunity Brief.
+- `apps/api`: módulos de identidade, organizações, perfis, catálogo, planos, parceiros, administração e inteligência artificial (`document-intelligence`).
 - `apps/collector`: conector oficial PNCP, normalização, ingestão e job de coleta.
-- `apps/worker`: publicação da outbox, matching explicável e avisos internos.
-- `packages`: contracts, database, source-sdk, events e config.
+- `apps/worker`: publicação da outbox, matching explicável, avisos internos e orquestração de IA.
+- `packages`: contracts, database, source-sdk, events, config e document-intelligence.
 - `tests`: domínio, integração, navegador e orientação de carga.
 - `docs`: arquitetura, ADRs, segurança, operação e três estágios de evolução.
 

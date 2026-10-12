@@ -163,3 +163,147 @@ export function matchProcurement(
   reasons.push('Prazo de proposta ainda aberto');
   return result(true);
 }
+
+export const aiTaskTypes = [
+  'procurement.classification',
+  'document.requirements_extraction',
+  'document.risk_review',
+  'opportunity.brief_generation',
+] as const;
+export type AITaskType = (typeof aiTaskTypes)[number];
+
+export const aiAnalysisStatuses = [
+  'PENDING',
+  'PROCESSING',
+  'COMPLETED',
+  'PARTIAL',
+  'FAILED',
+  'REQUIRES_REVIEW',
+  'SKIPPED_BUDGET',
+] as const;
+export type AIAnalysisStatus = (typeof aiAnalysisStatuses)[number];
+
+export const requirementCategories = [
+  'objeto',
+  'itens_quantitativos',
+  'modalidade',
+  'prazo_propostas',
+  'esclarecimento_impugnacao',
+  'local_execucao_entrega',
+  'condicoes_logisticas',
+  'habilitacao_juridica',
+  'regularidade_fiscal_trabalhista',
+  'qualificacao_economico_financeira',
+  'qualificacao_tecnica',
+  'atestados_capacidade',
+  'certificacoes_especificas',
+  'visita_tecnica',
+  'garantias',
+  'criterio_julgamento',
+  'condicoes_pagamento',
+  'prazos_execucao',
+  'riscos_atencao',
+  'outros',
+] as const;
+export type RequirementCategory = (typeof requirementCategories)[number];
+
+export const verificationStates = ['extracted', 'inferred', 'not_found', 'unverified'] as const;
+export type VerificationState = (typeof verificationStates)[number];
+
+export const requirementSchema = z.object({
+  id: z.string(),
+  category: z.enum(requirementCategories),
+  title: z.string(),
+  description: z.string(),
+  status: z.enum(verificationStates),
+  sourceDocument: z.string().nullable().default(null),
+  page: z.number().int().nullable().default(null),
+  section: z.string().nullable().default(null),
+  textExcerpt: z.string().nullable().default(null),
+  confidence: z.enum(['high', 'medium', 'low']).default('high'),
+  notes: z.string().nullable().default(null),
+});
+export type Requirement = z.infer<typeof requirementSchema>;
+
+export const riskItemSchema = z.object({
+  description: z.string(),
+  severity: z.enum(['low', 'medium', 'high']),
+  sourceDocument: z.string().nullable().default(null),
+  page: z.number().int().nullable().default(null),
+  textExcerpt: z.string().nullable().default(null),
+  notes: z.string().nullable().default(null),
+});
+export type RiskItem = z.infer<typeof riskItemSchema>;
+
+export const executionPlaceSchema = z.object({
+  state: z.string().nullable(),
+  municipality: z.string().nullable(),
+  details: z.string().nullable(),
+});
+export type ExecutionPlace = z.infer<typeof executionPlaceSchema>;
+
+export const procurementAIAnalysisSchema = z.object({
+  procurementId: z.string().uuid(),
+  version: z.number().int(),
+  status: z.enum(aiAnalysisStatuses),
+  model: z.string(),
+  provider: z.string(),
+  promptVersion: z.string(),
+  summary: z.string(),
+  executionPlace: executionPlaceSchema.nullable().default(null),
+  requirements: z.array(requirementSchema),
+  risks: z.array(riskItemSchema),
+  unverifiedPoints: z.array(z.string()),
+  analyzedAt: z.string(),
+});
+export type ProcurementAIAnalysis = z.infer<typeof procurementAIAnalysisSchema>;
+
+export const opportunityBriefSchema = z.object({
+  id: z.string().uuid().optional(),
+  organizationId: z.string().uuid(),
+  procurementId: z.string().uuid(),
+  profileId: z.string().uuid(),
+  status: z.enum(aiAnalysisStatuses),
+  summary: z.string(),
+  commercialFit: z.object({
+    score: z.number().min(0).max(100),
+    level: z.enum(['high', 'medium', 'low']),
+    matchingReasons: z.array(z.string()),
+    geographicFit: z.object({
+      basis: z.enum(['execution', 'agency', 'national']),
+      compatible: z.boolean(),
+      explanation: z.string(),
+    }),
+    strengths: z.array(z.string()),
+    gaps: z.array(z.string()),
+  }),
+  keyRequirements: z.array(requirementSchema),
+  risksAndCautions: z.array(riskItemSchema),
+  unverifiedInformation: z.array(z.string()),
+  suggestedNextSteps: z.array(z.string()),
+  officialLinks: z.array(z.object({ label: z.string(), url: z.string().url() })),
+  analyzedAt: z.string(),
+  disclaimer: z.string().default(
+    'Análise informativa preliminar automatizada por inteligência artificial. Não constitui parecer jurídico nem garantia de habilitação.',
+  ),
+});
+export type OpportunityBrief = z.infer<typeof opportunityBriefSchema>;
+
+export const aiUsageRecordSchema = z.object({
+  id: z.string().uuid().optional(),
+  provider: z.string(),
+  model: z.string(),
+  taskType: z.enum(aiTaskTypes),
+  procurementId: z.string().uuid().nullable().default(null),
+  procurementVersion: z.number().int().nullable().default(null),
+  inputTokens: z.number().int().nonnegative(),
+  outputTokens: z.number().int().nonnegative(),
+  totalTokens: z.number().int().nonnegative(),
+  latencyMs: z.number().int().nonnegative(),
+  costUsd: z.string(),
+  status: z.enum(['success', 'error', 'skipped_budget']),
+  errorMessage: z.string().nullable().default(null),
+  createdAt: z.string().optional(),
+});
+export type AIUsageRecord = z.infer<typeof aiUsageRecordSchema>;
+

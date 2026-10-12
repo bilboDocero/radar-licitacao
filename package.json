@@ -17,10 +17,11 @@
     "test:e2e": "playwright test",
     "infra:up": "docker compose up -d --wait postgres redis keycloak mailpit",
     "infra:down": "docker compose down",
-    "db:generate": "pnpm --filter @radar/database generate",
-    "db:migrate": "pnpm --filter @radar/database migrate",
-    "db:seed": "pnpm --filter @radar/database seed",
-    "collect": "pnpm --filter @radar/collector collect",
+    "db:generate": "corepack pnpm --filter @radar/database generate",
+    "db:migrate": "corepack pnpm --filter @radar/database migrate",
+    "db:seed": "corepack pnpm --filter @radar/database seed",
+    "collect": "corepack pnpm --filter @radar/collector collect",
+    "smoke:ai": "tsx scripts/smoke-ai.mjs",
     "health": "node scripts/health.mjs"
   },
   "devDependencies": {
@@ -46,6 +47,7 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.48.1",
     "vitest": "^3.2.4",
-    "vue-eslint-parser": "^10.2.0"
+    "vue-eslint-parser": "^10.2.0",
+    "zod": "^3.25.76"
   }
 }

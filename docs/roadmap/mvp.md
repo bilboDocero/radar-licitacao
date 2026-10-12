@@ -3,14 +3,15 @@
 ## Implementado
 
 - Fundação pnpm/Turbo/TS strict, Nuxt UI/Tailwind, NestJS, Drizzle e Compose.
-- 22 tabelas justificadas, migrations reais, dados de referência sem licitações simuladas.
+- 26 tabelas justificadas, 3 migrations versionadas, dados de referência sem licitações simuladas.
 - OIDC local com cadastro/verificação/recuperação; onboarding de empresa e associação owner.
 - Perfis comerciais, limites parametrizáveis, avaliação explícita de 14 dias.
 - PNCP incremental (duas modalidades), brutos, hash, versões, catálogo e filtros paginados.
 - Matching determinístico explicável, favoritos, notificações internas e preferência.
+- Inteligência Artificial & Análise Documental (multi-provider: Mock, OpenAI, Gemini): extração de requisitos, Opportunity Brief personalizado por empresa e controle orçamentário.
 - Parceiros, carteira limitada, convites com hash/expiração/aceite e marca inicial.
 - Áreas públicas e privadas, estados de erro/vazio/carregamento, tema e responsividade.
-- Consulta administrativa, cadastro de parceiro, auditoria básica, contratos OpenAPI.
+- Consulta administrativa, observabilidade de IA e custos, cadastro de parceiro, auditoria e contratos OpenAPI.
 - Testes de domínio, persistência/tenancy, E2E, CI e documentação operacional.
 
 ## Ainda necessário antes de operar comercialmente

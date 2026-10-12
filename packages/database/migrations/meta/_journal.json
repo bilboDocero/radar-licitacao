@@ -15,6 +15,13 @@
       "when": 1791760794280,
       "tag": "0001_shallow_lily_hollister",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791779963624,
+      "tag": "0002_wild_maelstrom",
+      "breakpoints": true
     }
   ]
 }

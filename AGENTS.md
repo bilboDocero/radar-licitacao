@@ -26,21 +26,23 @@
 - `ADR 0003 — Coleta compartilhada`: Licitações são globais e coletadas uma única vez por fonte/identificador externo; tenants compartilham o catálogo e recebem correspondências privadas.
 - `ADR 0004 — Tenant por organização`: A organização (`organizations.id`) é a fronteira estrita de isolamento de dados. Header `X-Organization-Id` é seleção de contexto, nunca permissão; validação é sempre feita pela associação do usuário no banco.
 - `ADR 0005 — Keycloak e BFF`: Sessão e tokens sensíveis não trafegam nem são expostos no cliente JavaScript.
+- `ADR 0006 — Inteligência Documental e Arquitetura Multi-Provider de IA`: Arquitetura agnóstica e desacoplada (`@radar/document-intelligence`), processamento compartilhado de editais por versão, Opportunity Brief personalizado e controle rigoroso de custos e evidências.
 
 ## 3. Organização do código
 
 ### Aplicações (`apps/`)
 - `apps/web`: Nuxt 4, páginas públicas, painel autenticado (`/app/*`), área de parceiros (`/parceiro/*`), área administrativa (`/admin/*`), layouts, componentes, composables e BFF em `server/`.
-- `apps/api`: API NestJS modular com rotas `/api/v1`. Módulos: `identity`, `tenancy`, `organizations`, `partners`, `commercial-profiles`, `geography`, `sources`, `procurements`, `matching`, `alerts`, `notifications`, `subscriptions`, `billing`, `audit`.
+- `apps/api`: API NestJS modular com rotas `/api/v1`. Módulos: `identity`, `tenancy`, `organizations`, `partners`, `commercial-profiles`, `geography`, `sources`, `procurements`, `matching`, `alerts`, `notifications`, `subscriptions`, `billing`, `audit`, `document-intelligence`.
 - `apps/collector`: Processo de coleta e ingestão da fonte oficial PNCP; conector, normalizadores, deduplicação e jobs BullMQ.
-- `apps/worker`: Processo de background; leitor periódico de outbox (`outbox_events`), publicação no BullMQ e execução do algoritmo determinístico de matching e geração de alertas internos.
+- `apps/worker`: Processo de background; leitor periódico de outbox (`outbox_events`), publicação no BullMQ, execução do algoritmo determinístico de matching, geração de alertas internos e orquestração assíncrona de inteligência artificial.
 
 ### Pacotes compartilhados (`packages/`)
-- `packages/contracts`: Schemas Zod, tipos TypeScript canônicos, contratos de entrada/saída, validação OpenAPI e a função de matching puro determinístico (`matchProcurement`).
-- `packages/database`: Schemas Drizzle de todas as 22 tabelas, conexão PostgreSQL, migrações SQL versionadas e rotina de seed de referência.
-- `packages/events`: Definição de nomes de filas BullMQ e schemas Zod de eventos transacionais da outbox.
+- `packages/contracts`: Schemas Zod, tipos TypeScript canônicos, contratos de entrada/saída, validação OpenAPI, função de matching puro determinístico (`matchProcurement`) e schemas de IA (`procurementAIAnalysisSchema`, `opportunityBriefSchema`).
+- `packages/database`: Schemas Drizzle de todas as 26 tabelas, conexão PostgreSQL, migrações SQL versionadas e rotina de seed de referência.
+- `packages/events`: Definição de nomes de filas BullMQ (`radar-collection`, `radar-matching`, `radar-intelligence`) e schemas Zod de eventos da outbox.
 - `packages/source-sdk`: Interfaces para conectores de coleta (`SourceConnector`), cálculo de hash estável (`stableHash`) e guardas de segurança SSRF (`assertApprovedUrl`).
-- `packages/config`: Validação de variáveis de ambiente com Zod, logger estruturado com Pino (redaction de segredos) e inicialização de OpenTelemetry.
+- `packages/document-intelligence`: Módulo desacoplado de IA contendo adapters multi-provider (`MockAIProvider`, `OpenAIProvider`, `GeminiProvider`), roteador dinâmico (`AIModelRouter`), controle orçamentário (`AIUsageTracker`), extração documental e gerador de Opportunity Briefs.
+- `packages/config`: Validação de variáveis de ambiente com Zod (incluindo parâmetros de IA e provedores), logger estruturado com Pino (redaction de credenciais) e inicialização de OpenTelemetry.
 
 ### Regras de importação e dependências
 - Dependências são estritamente unidirecionais: aplicações importam pacotes de workspace (`@radar/*`), mas pacotes **nunca** importam aplicações e não criam referências circulares.
@@ -130,3 +132,14 @@ pnpm health                   # Health check das dependências e serviços locai
 ```
 
 *Nota para ambientes Windows:* Caso a execução de scripts seja restrita pela política de execução do PowerShell, utilize `pnpm.cmd` ou execute comandos via `corepack pnpm <comando>`.
+
+<!-- BEGIN:turborepo-agent-rules -->
+
+# This is NOT the Turborepo you know
+
+Turborepo configuration, task behavior, and CLI commands can vary between installed versions and may differ from your training data. Resolve the `turbo` package from this file's directory or relevant workspace; in monorepos, it may not be visible from the repository root. For example, run `node -p "require.resolve('turbo/package.json')"` from a workspace that depends on `turbo`.
+
+Read `docs/README.md` inside that installed package first, then read the relevant pages from its `docs/` directory before changing Turborepo configuration or commands. Heed deprecation notices. These bundled docs match the installed package version and are available without network access.
+
+This block is written and re-added by `turbo` before repository-scoped commands when an AI agent is detected. In the Turborepo source repository, its template is defined in `crates/turborepo-cli/src/cli/agent_guidance.rs`. Removing the managed block while updates are enabled means a later qualifying invocation will add it again. Set `"agentGuidance": false` in the root `turbo.json` or `turbo.jsonc` to opt out; this does not remove an existing block. Keep the block committed with your work to avoid an uncommitted change on the next agent invocation.
+<!-- END:turborepo-agent-rules -->

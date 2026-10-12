@@ -11,7 +11,15 @@ import {
   index,
   primaryKey,
 } from 'drizzle-orm/pg-core';
-import type { Coverage, CanonicalProcurement, Role } from '@radar/contracts';
+import type {
+  Coverage,
+  CanonicalProcurement,
+  Role,
+  AIAnalysisStatus,
+  Requirement,
+  RiskItem,
+  ExecutionPlace,
+} from '@radar/contracts';
 const id = () => uuid('id').primaryKey().defaultRandom();
 const created = () => timestamp('created_at', { withTimezone: true }).notNull().defaultNow();
 export const users = pgTable('users', {
@@ -307,3 +315,108 @@ export const outboxEvents = pgTable(
   },
   (t) => [index('outbox_dispatched_idx').on(t.dispatchedAt)],
 );
+export const documentExtractions = pgTable(
+  'document_extractions',
+  {
+    id: id(),
+    procurementId: uuid('procurement_id')
+      .notNull()
+      .references(() => procurements.id, { onDelete: 'cascade' }),
+    sourceDocumentUrl: text('source_document_url').notNull(),
+    name: text('name').notNull(),
+    hash: text('hash').notNull(),
+    pageCount: integer('page_count').notNull().default(1),
+    extractedText: text('extracted_text').notNull(),
+    sections: jsonb('sections').$type<Array<{ title: string; page?: number; content: string }>>(),
+    createdAt: created(),
+  },
+  (t) => [
+    index('doc_extract_procurement_idx').on(t.procurementId),
+    uniqueIndex('doc_extract_hash_idx').on(t.procurementId, t.hash),
+  ],
+);
+export const procurementAIAnalyses = pgTable(
+  'procurement_ai_analyses',
+  {
+    id: id(),
+    procurementId: uuid('procurement_id')
+      .notNull()
+      .references(() => procurements.id, { onDelete: 'cascade' }),
+    version: integer('version').notNull(),
+    status: text('status').$type<AIAnalysisStatus>().notNull().default('PENDING'),
+    provider: text('provider').notNull(),
+    model: text('model').notNull(),
+    promptVersion: text('prompt_version').notNull(),
+    summary: text('summary').notNull(),
+    executionPlace: jsonb('execution_place').$type<ExecutionPlace>(),
+    requirements: jsonb('requirements').$type<Requirement[]>().notNull(),
+    risks: jsonb('risks').$type<RiskItem[]>().notNull(),
+    unverifiedPoints: jsonb('unverified_points').$type<string[]>().notNull(),
+    tokensUsed: integer('tokens_used').notNull().default(0),
+    costUsd: numeric('cost_usd', { precision: 10, scale: 6 }).notNull().default('0'),
+    error: text('error'),
+    createdAt: created(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('ai_analysis_procurement_version').on(t.procurementId, t.version),
+    index('ai_analysis_procurement_idx').on(t.procurementId),
+    index('ai_analysis_status_idx').on(t.status),
+  ],
+);
+export const opportunityBriefs = pgTable(
+  'opportunity_briefs',
+  {
+    id: id(),
+    organizationId: uuid('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    profileId: uuid('profile_id')
+      .notNull()
+      .references(() => commercialProfiles.id, { onDelete: 'cascade' }),
+    procurementId: uuid('procurement_id')
+      .notNull()
+      .references(() => procurements.id, { onDelete: 'cascade' }),
+    status: text('status').$type<AIAnalysisStatus>().notNull().default('PENDING'),
+    summary: text('summary').notNull(),
+    commercialFit: jsonb('commercial_fit').notNull(),
+    keyRequirements: jsonb('key_requirements').$type<Requirement[]>().notNull(),
+    risksAndCautions: jsonb('risks_and_cautions').$type<RiskItem[]>().notNull(),
+    unverifiedInformation: jsonb('unverified_information').$type<string[]>().notNull(),
+    suggestedNextSteps: jsonb('suggested_next_steps').$type<string[]>().notNull(),
+    officialLinks: jsonb('official_links').$type<Array<{ label: string; url: string }>>().notNull(),
+    disclaimer: text('disclaimer').notNull(),
+    createdAt: created(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('brief_org_profile_procurement').on(t.organizationId, t.profileId, t.procurementId),
+    index('brief_org_idx').on(t.organizationId),
+    index('brief_procurement_idx').on(t.procurementId),
+  ],
+);
+export const aiUsageRecords = pgTable(
+  'ai_usage_records',
+  {
+    id: id(),
+    provider: text('provider').notNull(),
+    model: text('model').notNull(),
+    taskType: text('task_type').notNull(),
+    procurementId: uuid('procurement_id').references(() => procurements.id),
+    procurementVersion: integer('procurement_version'),
+    inputTokens: integer('input_tokens').notNull().default(0),
+    outputTokens: integer('output_tokens').notNull().default(0),
+    totalTokens: integer('total_tokens').notNull().default(0),
+    latencyMs: integer('latency_ms').notNull().default(0),
+    costUsd: numeric('cost_usd', { precision: 12, scale: 6 }).notNull().default('0'),
+    status: text('status').notNull(),
+    errorMessage: text('error_message'),
+    createdAt: created(),
+  },
+  (t) => [
+    index('ai_usage_provider_created_idx').on(t.provider, t.createdAt),
+    index('ai_usage_task_idx').on(t.taskType),
+    index('ai_usage_procurement_idx').on(t.procurementId),
+  ],
+);
+

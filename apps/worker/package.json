@@ -12,6 +12,7 @@
     "@radar/contracts": "workspace:*",
     "@radar/database": "workspace:*",
     "@radar/events": "workspace:*",
+    "@radar/document-intelligence": "workspace:*",
     "bullmq": "^5.66.4",
     "ioredis": "^5.8.2",
     "drizzle-orm": "^0.45.1",

@@ -5,6 +5,7 @@
 3. O perfil valida o limite sob bloqueio da linha da organização. Perfil e evento outbox são gravados na mesma transação.
 4. O collector lê a API oficial, guarda payload bruto e normaliza. Lock transacional por fonte/id evita gravações concorrentes do mesmo registro. Alterações criam versão e evento outbox atomicamente.
 5. O worker publica eventos no BullMQ usando o UUID da outbox como jobId. Só depois marca despacho; reenvios são seguros. O consumidor verifica o contrato do evento, calcula correspondências e grava matches/avisos com restrições únicas.
-6. O painel consulta exclusivamente registros privados da organização validada. O detalhe remete ao edital oficial; não há download ou análise documental neste estágio.
+6. O painel consulta exclusivamente registros privados da organização validada. O detalhe da licitação exibe os dados oficiais e o Opportunity Brief gerado pela inteligência artificial (`opportunity_briefs`), com requisitos extraídos, riscos, aderência comercial e links oficiais.
+7. O processamento documental da IA opera de forma assíncrona: uma versão de edital é extraída e analisada uma única vez de forma compartilhada (`procurement_ai_analyses`), e briefs específicos são derivados para cada empresa com perfil compatível sem atrasar o alerta preliminar de matching.
 
 Semântica: entrega pelo menos uma vez com efeitos idempotentes. Jobs concluídos retidos por sete dias; eventos despachados ficam no banco para operação/auditoria. Reexecução após retenção continua protegida por unicidade no banco.

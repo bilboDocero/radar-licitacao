@@ -13,6 +13,7 @@ const links = computed(() =>
         ['/admin/solicitacoes', 'Solicitações', 'inbox'],
         ['/admin/coletores', 'Coletores', 'activity'],
         ['/admin/licitacoes', 'Licitações', 'files'],
+        ['/admin/inteligencia-artificial', 'Inteligência Artificial', 'sparkles'],
         ['/admin/planos', 'Planos', 'credit-card'],
         ['/admin/auditoria', 'Auditoria', 'shield-check'],
       ]
