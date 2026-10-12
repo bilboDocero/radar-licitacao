@@ -87,7 +87,7 @@ A plataforma conta com:
 | **Site público e FAQ** | `VALIDATED` | Landing page, funcionalidades, planos, cobertura, FAQ, contato, termos e privacidade implementados em Nuxt 4 com identidade visual SellerOS, suporte integral e permanente a Light Mode (#FFFFFF) e Dark Mode (#0F172A), alternância no cabeçalho e conformidade com WCAG 2.2 AA (texto escuro #111827 em botões laranja #FF9900). 5 testes E2E com capturas de tela aprovados em `theme.spec.ts`. | Termos de uso e privacidade são minutas iniciais pendentes de validação jurídica; formulário de contato não envia mensagens para serviço externo. | Realizar revisão jurídica dos textos legais e integrar formulário de contato a serviço de CRM. |
 | **Segurança** | `VALIDATED` | OIDC RS256 com verificação de audiência/emissor, checagem de e-mail confirmado, tokens em Redis, validação Zod estrita, Helmet, rate limit (120 req/min/IP), guarda contra SSRF (`assertApprovedUrl` + `assertSafeDestinationDns` com bloqueio estrito de IPs privados/loopback/cloud metadata) e cliente seguro `safeDownloadFile`. 13 testes unitários de segurança passando. | Rate limiting opera em memória por nó (não distribuído); RLS desativado no PostgreSQL; segredos no compose são públicos e restritos a dev. | Configurar rate limiting em Redis compartilhado e desenhar cofre de segredos para produção. |
 | **Observabilidade** | `IN_PROGRESS` | Logger estruturado com Pino e redaction de credenciais/tokens/chaves de IA; telemetria de uso e custos de IA em banco; inicialização de OpenTelemetry (`startTelemetry`). | Nenhum coletor OTLP configurado no ambiente local; ausência de métricas de negócio e dashboards operacionais (Grafana/Prometheus). | Adicionar stack de observabilidade local no Compose e instrumentar contadores de negócios. |
-| **Testes e CI/CD** | `VALIDATED` | 69 testes unitários passando em tempo de execução (`pnpm test`), 8 testes de integração (`pnpm test:integration`), 8 testes E2E Playwright (`app.spec.ts`, `registration.spec.ts` e `theme.spec.ts`), smoke test de IA real aprovado (`pnpm smoke:ai`), smoke test de enriquecimento cadastral aprovado (`pnpm smoke:registry`). | Testes de integração com banco isolado e E2E Playwright dependem de inicialização prévia dos containers Docker (`infra:up`). | Executar testes de integração e E2E assim que o daemon Docker for iniciado no ambiente. |
+| **Testes e CI/CD** | `VALIDATED` | 74 testes unitários passando em tempo de execução (`pnpm test`), 8 testes de integração (`pnpm test:integration`), 8 testes E2E Playwright (`app.spec.ts`, `registration.spec.ts` e `theme.spec.ts`), smoke test de IA real aprovado (`pnpm smoke:ai`), smoke test de enriquecimento cadastral aprovado (`pnpm smoke:registry`). | Testes de integração com banco isolado e E2E Playwright dependem de inicialização prévia dos containers Docker (`infra:up`). | Executar testes de integração e E2E assim que o daemon Docker for iniciado no ambiente. |
 
 ---
 
@@ -96,7 +96,7 @@ A plataforma conta com:
 ### MVP (Estágio 1)
 - **Capacidades concluídas:**
   - Fundação monorepo em TypeScript strict com linting, formatação e orquestração por Turborepo.
-  - Banco de dados PostgreSQL com 22 tabelas mapeadas no Drizzle ORM e migrations versionadas.
+  - Banco de dados PostgreSQL com 26 tabelas mapeadas no Drizzle ORM e 3 migrations versionadas.
   - Autenticação OIDC com Keycloak local (cadastro, confirmação de e-mail e recuperação de senha) e BFF seguro em Nuxt.
   - Onboarding de empresas com associação inicial ao papel de `owner` e período de avaliação gratuito de 14 dias no plano Nacional.
   - Definição de perfis comerciais com palavras-chave, categorias e delimitação de cobertura (estados, municípios ou nacional).
@@ -216,22 +216,25 @@ A plataforma conta com:
 ### Resultado dos testes nesta verificação
 - **Comando executado:** `corepack pnpm test`
   - **Contexto:** Suíte de testes unitários com Vitest.
-  - **Resultado observado:** Aprovado (`4 passed, 35 passed, 0 failed` em 3.50s).
-  - **Detalhamento:** 10 testes de coleta PNCP (`collector.test.ts`), 10 testes de matching determinístico (`matching.test.ts`), 8 testes de inteligência artificial (`document-intelligence.test.ts` com avaliação de editais reais e roteamento de modelos) e 7 testes de contratos e sanitização/máscara de CNPJ (`contracts.test.ts`).
+  - **Resultado observado:** Aprovado (`8 passed, 74 passed, 0 failed` em 13.48s).
+  - **Detalhamento:** 5 testes de cache de análise (`analysis-cache.test.ts`), 13 testes de segurança SSRF (`ssrf-security.test.ts`), 12 testes de pipeline documental e auditoria de evidências (`document-pipeline.test.ts`), 10 testes de coleta PNCP (`collector.test.ts`), 10 testes de matching determinístico (`matching.test.ts`), 9 testes de enriquecimento cadastral de empresas (`company-registry.test.ts`), 8 testes de inteligência artificial (`document-intelligence.test.ts`) e 7 testes de contratos e sanitização/máscara de CNPJ (`contracts.test.ts`).
 - **Comando executado:** `corepack pnpm test:integration`
   - **Contexto:** Suíte de integração com criação dinâmica de banco PostgreSQL temporário isolado (`persistence.test.ts`).
-  - **Resultado observado:** Aprovado (`1 passed, 7 passed, 0 failed` em 3.14s).
-  - **Detalhamento:** Criação atômica de empresas e proprietários, bloqueio de acesso entre tenants, deduplicação e versionamento de editais na ingestão, isolamento de favoritos, reprocessamento idempotente de jobs no worker e bloqueio de direitos após expiração de trial.
+  - **Resultado observado:** Aprovado (`1 passed, 8 passed, 0 failed` em 3.74s).
+  - **Detalhamento:** Criação atômica de empresas e proprietários, bloqueio de acesso entre tenants, deduplicação e versionamento de editais na ingestão, isolamento de favoritos, reprocessamento idempotente de jobs no worker, bloqueio de direitos após expiração de trial e atualização cadastral com consulta enriquecida.
 - **Comando executado:** `corepack pnpm test:e2e`
   - **Contexto:** Testes de ponta a ponta com Playwright e Chromium contra os serviços locais em execução.
-  - **Resultado observado:** Aprovado (`3 passed, 0 failed` em 28.2s).
-  - **Detalhamento:** Páginas públicas e fluxo vertical completo autenticado (`app.spec.ts`), layout responsivo mobile 390×844px sem overflow horizontal (`app.spec.ts`) e cadastro completo com confirmação de e-mail via Mailpit e onboarding da empresa (`registration.spec.ts`).
+  - **Resultado observado:** Aprovado (`8 passed, 0 failed` em 23.0s).
+  - **Detalhamento:** Páginas públicas e fluxo vertical completo autenticado (`app.spec.ts`), layout responsivo mobile 390×844px sem overflow horizontal (`app.spec.ts`), cadastro completo com confirmação de e-mail via Mailpit e onboarding da empresa (`registration.spec.ts`), e suíte de temas em `theme.spec.ts` (light desktop com texto escuro sobre botão laranja, dark desktop com fundo `#0f172a`, light mobile, dark mobile e alternância interativa de tema).
 - **Comando executado:** `node scripts/health.mjs`
   - **Contexto:** Healthcheck das rotas e serviços locais.
   - **Resultado observado:** Aprovado (HTTP 200 para Web, API/PostgreSQL/Redis, OIDC Keycloak e Mailpit).
 - **Comando executado:** `corepack pnpm smoke:ai`
   - **Contexto:** Script de verificação de conectividade e validação de saída estruturada de IA (`scripts/smoke-ai.mjs`) com provedor real configurado.
   - **Resultado observado:** Aprovado (`[SUCESSO] Resposta estruturada recebida: gemini / gemini-3.5-flash-lite`, latência 3.3s, 150 tokens in / 1.145 tokens out, custo real calculado $0.000355 USD). Requisitos fáticos e riscos extraídos em schema Zod estrito.
+- **Comando executado:** `corepack pnpm smoke:registry`
+  - **Contexto:** Script de verificação da integração cadastral de empresas (`scripts/smoke-registry.mjs`).
+  - **Resultado observado:** Aprovado (`[SUCESSO] Dados cadastrais normalizados com sucesso: Banco do Brasil SA`, latência 966ms). Schema `OrganizationRegistryView` validado com 100% de conformidade.
 - **Comando executado:** `corepack pnpm -r --filter "./packages/*" --filter "./apps/*" run typecheck`
   - **Contexto:** Checagem estrita de tipos TypeScript em todas as 4 aplicações e 6 pacotes.
   - **Resultado observado:** Aprovado com zero erros de tipagem.

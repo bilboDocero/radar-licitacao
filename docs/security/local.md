@@ -6,4 +6,4 @@ Headers de correlação são restritos em formato/tamanho. Erros internos são o
 
 As credenciais do Compose são públicas e exclusivas de desenvolvimento; portas de dependências são ligadas a loopback. Servidores dev usam 0.0.0.0 para funcionar também em containers. Exposição externa exige firewall/proxy/HTTPS. Não usar esta configuração como produção.
 
-Novas fontes não são executadas por URL de usuário. Apenas origem PNCP compilada e redirects desabilitados. Alterações sensíveis básicas geram auditoria; cobertura de auditoria precisa crescer junto com novos comandos de domínio.
+Novas fontes não são executadas por URL de usuário. Chamadas externas a documentos utilizam `safeDownloadFile` e `assertApprovedUrl` com checagem obrigatória de resolução DNS (`assertSafeDestinationDns`), bloqueio de faixas privadas RFC 1918, loopback, link-local e cloud metadata (`169.254.169.254`), limite de tamanho de 20 MB e revalidação estrita a cada salto de redirect. Alterações sensíveis geram auditoria em `audit_logs` e chamadas de IA registram consumo e custos em `ai_usage_records`.

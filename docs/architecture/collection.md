@@ -8,7 +8,7 @@ O hash canônico ignora ordem de propriedades. O payload bruto tem hash próprio
 
 Agendamento é opt-in (`COLLECTION_ENABLED=true`); manual via `pnpm collect`, com collector rodando. URLs fixas no código, HTTPS, origem exata e redirects proibidos. Sugestões de portais jamais viram requests. Novas fontes precisam de revisão de acesso, DNS público, redirects e rate limit; não há crawler genérico liberado.
 
-Crawlee, Cheerio e Playwright estão instalados para conectores homologados futuros. A API oficial PNCP usa fetch porque não exige crawling HTML. Não se contornam CAPTCHA, autenticação ou restrições. PDFs, itens detalhados, categorias extraídas e OCR estão pendentes.
+Crawlee, Cheerio e Playwright estão instalados para conectores homologados futuros. A API oficial PNCP usa fetch porque não exige crawling HTML. Não se contornam CAPTCHA, autenticação ou restrições. O download seguro (`safeDownloadFile`) e o parser `unpdf` existem como componentes de apoio no monorepo; a descoberta e o pipeline completo de PDFs ponta a ponta a partir dos arquivos do PNCP estão no escopo da próxima entrega (ADR 0007), enquanto OCR e formatos complexos são posteriores.
 
 ## Evolução documental planejada
 

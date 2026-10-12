@@ -8,6 +8,7 @@
 - Perfis comerciais, limites parametrizáveis, avaliação explícita de 14 dias.
 - PNCP incremental (duas modalidades), brutos, hash, versões, catálogo e filtros paginados.
 - Matching determinístico explicável, favoritos, notificações internas e preferência.
+- Enriquecimento cadastral empresarial com BrasilAPI e fallback CNPJ.ws com cache de 7 dias e máscara dinâmica de CNPJ.
 - IA com adapters Mock, OpenAI e Gemini; chamada real Gemini validada sobre metadados, Opportunity Brief por empresa e auditoria de uso. Download/parser PDF existem como componentes auxiliares, sem integração documental ponta a ponta.
 - Parceiros, carteira limitada, convites com hash/expiração/aceite e marca inicial.
 - Áreas públicas e privadas, estados de erro/vazio/carregamento, tema e responsividade.

@@ -2,7 +2,7 @@
 
 Swagger: http://localhost:4000/api/docs. JSON: http://localhost:4000/api/docs-json. Schemas de entrada são gerados dos mesmos validadores Zod usados pela API. Recursos privados recebem `Authorization: Bearer <access_token>`; recursos da empresa exigem também `X-Organization-Id`, validado por associação. O navegador usa `/api/backend/*` para manter tokens no servidor.
 
-Rotas públicas: GET health, plans, sources, geography. Fluxo básico: GET identity/me → POST organizations → POST profiles → GET matches/procurements → GET procurements/:id/brief → PUT favorites/:id. Rotas de IA: GET procurements/:id/analysis (análise compartilhada), GET procurements/:id/brief (brief do tenant), GET admin/ai/overview (métricas/custos). Administração exige role realm `platform-admin`. Vínculos de parceiro não concedem acesso à empresa.
+Rotas públicas: GET health, plans, sources, geography. Fluxo básico: GET identity/me → POST organizations → GET/PATCH organizations/current (atualização e cadastro de CNPJ) → GET organizations/current/registry (enriquecimento cadastral via BrasilAPI/CNPJ.ws com cache de 7 dias) → POST profiles → GET matches/procurements → GET procurements/:id/brief → PUT favorites/:id. Rotas de IA: GET procurements/:id/analysis (análise compartilhada), GET procurements/:id/brief (brief do tenant), GET admin/ai/overview (métricas/custos). Administração exige role realm `platform-admin`. Vínculos de parceiro não concedem acesso à empresa.
 
 O endpoint POST de reanálise foi removido. Consultas reutilizam a análise compartilhada compatível e atualizam o brief sob demanda; assinantes não podem forçar uma segunda inferência.
 
