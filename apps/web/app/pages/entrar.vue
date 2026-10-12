@@ -40,7 +40,7 @@ useSeoMeta({ title: 'Acesse sua conta' });
     <NuxtLink to="/auth/logout" external class="hover:text-slate-200 underline">
       Limpar sessão anterior do Keycloak
     </NuxtLink>
-    <NuxtLink to="/cadastro" class="text-emerald-700 font-semibold hover:underline">
+    <NuxtLink to="/cadastro" class="text-primary-600 dark:text-primary-400 font-semibold hover:underline">
       Criar nova conta
     </NuxtLink>
   </div>

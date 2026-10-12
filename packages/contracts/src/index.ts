@@ -138,7 +138,7 @@ export const sourceRequestInput = z
   .strict();
 export const searchInput = z.object({
   q: z.string().max(150).default(''),
-  uf: z.enum(states).optional(),
+  uf: z.string().optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(50).default(12),
   open: z.enum(['true', 'false']).optional(),

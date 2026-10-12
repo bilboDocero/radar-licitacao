@@ -18,6 +18,7 @@ const { data, pending, error, refresh } = await useAsyncData('dashboard', async 
       to="/app/radar"
       trailing-icon="i-lucide-arrow-up-right"
       variant="outline"
+      color="neutral"
       class="hidden sm:inline-flex"
       >Explorar licitações</UButton
     ></PageHeading
@@ -29,7 +30,7 @@ const { data, pending, error, refresh } = await useAsyncData('dashboard', async 
           <p class="stat-value">{{ data?.matches.length || 0 }}</p>
           <p class="stat-note">Propostas com prazo aberto</p>
         </div>
-        <UIcon name="i-lucide-radar" class="text-emerald-700 size-5" />
+        <UIcon name="i-lucide-radar" class="text-primary-500 size-5" />
       </div>
       <div class="panel stat">
         <div>
@@ -37,7 +38,7 @@ const { data, pending, error, refresh } = await useAsyncData('dashboard', async 
           <p class="stat-value">{{ data?.favorites.length || 0 }}</p>
           <p class="stat-note">Na lista da sua empresa</p>
         </div>
-        <UIcon name="i-lucide-bookmark" class="text-emerald-700 size-5" />
+        <UIcon name="i-lucide-bookmark" class="text-primary-500 size-5" />
       </div>
       <div class="panel stat">
         <div>
@@ -45,7 +46,7 @@ const { data, pending, error, refresh } = await useAsyncData('dashboard', async 
           <p class="stat-value">{{ data?.profiles.length || 0 }}</p>
           <p class="stat-note">Interesses que orientam seu Radar</p>
         </div>
-        <UIcon name="i-lucide-sliders-horizontal" class="text-emerald-700 size-5" />
+        <UIcon name="i-lucide-sliders-horizontal" class="text-primary-500 size-5" />
       </div>
     </div>
     <div class="dashboard-grid">
@@ -61,7 +62,7 @@ const { data, pending, error, refresh } = await useAsyncData('dashboard', async 
           ><template #action
             ><UButton
               to="/app/perfil-comercial"
-              variant="outline"
+              color="primary"
               trailing-icon="i-lucide-arrow-right"
               >Configurar meu perfil</UButton
             ></template
@@ -74,29 +75,29 @@ const { data, pending, error, refresh } = await useAsyncData('dashboard', async 
       </section>
       <aside class="space-y-5">
         <div class="panel">
-          <UIcon name="i-lucide-route" class="size-6 text-emerald-700 mb-4" />
+          <UIcon name="i-lucide-route" class="size-6 text-primary-500 mb-4" />
           <h2 class="panel-title">Seu caminho até a oportunidade</h2>
-          <ol class="space-y-6 text-xs text-slate-500">
+          <ol class="space-y-6 text-xs text-slate-500 dark:text-slate-400">
             <li class="flex gap-3">
-              <span class="text-emerald-700 font-bold">01</span>
+              <span class="text-primary-600 dark:text-primary-400 font-bold text-sm">01</span>
               <div>
-                <strong class="text-slate-700">Sua empresa</strong>
+                <strong class="text-slate-900 dark:text-slate-100">Sua empresa</strong>
                 <p class="mt-1">{{ radar.organization.value?.name }}</p>
               </div>
             </li>
             <li class="flex gap-3">
-              <span class="text-emerald-700 font-bold">02</span>
+              <span class="text-primary-600 dark:text-primary-400 font-bold text-sm">02</span>
               <div>
-                <NuxtLink to="/app/perfil-comercial" class="font-semibold text-slate-700"
+                <NuxtLink to="/app/perfil-comercial" class="font-semibold text-slate-900 dark:text-slate-100 hover:text-primary-500"
                   >Seu perfil comercial →</NuxtLink
                 >
                 <p class="mt-1">Produtos, serviços e palavras-chave</p>
               </div>
             </li>
             <li class="flex gap-3">
-              <span class="text-emerald-700 font-bold">03</span>
+              <span class="text-primary-600 dark:text-primary-400 font-bold text-sm">03</span>
               <div>
-                <NuxtLink to="/app/cobertura" class="font-semibold text-slate-700"
+                <NuxtLink to="/app/cobertura" class="font-semibold text-slate-900 dark:text-slate-100 hover:text-primary-500"
                   >Sua área de atuação →</NuxtLink
                 >
                 <p class="mt-1">Municípios, estados ou todo o país</p>
@@ -104,11 +105,11 @@ const { data, pending, error, refresh } = await useAsyncData('dashboard', async 
             </li>
           </ol>
         </div>
-        <div class="p-5 bg-emerald-50/60 rounded-lg border border-emerald-100">
-          <p class="text-xs font-semibold text-emerald-800 flex gap-2">
+        <div class="p-5 bg-primary-50/50 dark:bg-primary-950/20 rounded-xl border border-primary-200 dark:border-primary-900/40">
+          <p class="text-xs font-semibold text-primary-900 dark:text-primary-300 flex items-center gap-2">
             <UIcon name="i-lucide-info" />Informação com contexto
           </p>
-          <p class="text-xs leading-6 text-emerald-800/70 mt-2">
+          <p class="text-xs leading-6 text-primary-800/80 dark:text-primary-300/70 mt-2">
             O endereço do órgão pode ser diferente do local de entrega. Confira sempre as condições
             no edital oficial.
           </p>

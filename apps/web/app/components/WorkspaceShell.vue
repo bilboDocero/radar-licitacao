@@ -33,8 +33,9 @@ const links = computed(() =>
           ['/app/perfil-comercial', 'Perfil comercial', 'sliders-horizontal'],
           ['/app/cobertura', 'Minha cobertura', 'map'],
           ['/app/fontes', 'Fontes monitoradas', 'radio-tower'],
-          ['/app/assinatura', 'Assinatura', 'credit-card'],
-          ['/app/empresa', 'Minha empresa', 'building-2'],
+          ['/app/assinatura', 'Minha assinatura', 'credit-card'],
+          ['/app/empresa', 'Dados da empresa', 'building-2'],
+          ['/app/configuracoes', 'Configurações', 'settings'],
         ],
 );
 async function logout() {
@@ -48,7 +49,7 @@ function switchOrganization(event: Event) {
 <template>
   <div class="app-shell">
     <aside class="sidebar" :class="{ open }">
-      <NuxtLink to="/" class="wordmark">radar.<small>MVP</small></NuxtLink>
+      <NuxtLink to="/" class="wordmark">radar<span class="text-primary-500 font-bold">.</span><small>MVP</small></NuxtLink>
       <p class="nav-caption">
         {{
           area === 'admin'
@@ -69,9 +70,9 @@ function switchOrganization(event: Event) {
         >
       </nav>
       <div class="sidebar-bottom">
-        <NuxtLink to="/app/ajuda" class="flex items-center gap-2 mb-4"
+        <NuxtLink to="/app/ajuda" class="flex items-center gap-2 mb-4 hover:text-primary-500 transition-colors"
           ><UIcon name="i-lucide-circle-help" />Central de ajuda</NuxtLink
-        ><NuxtLink v-if="user?.roles.includes('platform-admin')" to="/admin" class="block mb-3"
+        ><NuxtLink v-if="user?.roles.includes('platform-admin')" to="/admin" class="block mb-3 hover:text-primary-500 transition-colors font-medium"
           >Administração →</NuxtLink
         >
         <p>Informação pública.<br />Visão para o seu negócio.</p>
@@ -87,7 +88,7 @@ function switchOrganization(event: Event) {
             aria-label="Abrir menu"
             class="mobile-menu"
             @click="open = !open"
-          /><UIcon name="i-lucide-building-2" class="size-4 text-emerald-700" /><select
+          /><UIcon name="i-lucide-building-2" class="size-4 text-primary-500" /><select
             v-if="radar.organizations.value.length"
             :value="radar.activeOrganization.value"
             aria-label="Empresa ativa"
@@ -102,16 +103,18 @@ function switchOrganization(event: Event) {
           }}</UBadge>
         </div>
         <div class="flex items-center gap-4">
-          <UColorModeButton /><span class="hidden md:block text-xs text-slate-500">{{
+          <UColorModeButton /><span class="hidden md:block text-xs text-slate-500 dark:text-slate-400">{{
             user?.name
           }}</span
           ><UButton
             color="neutral"
             variant="ghost"
             icon="i-lucide-log-out"
-            aria-label="Sair"
+            size="sm"
+            aria-label="Sair da conta"
             @click="logout"
-          />
+            >Sair</UButton
+          >
         </div>
       </header>
       <main class="app-content"><slot /></main>

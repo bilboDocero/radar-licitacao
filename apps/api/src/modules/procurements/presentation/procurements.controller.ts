@@ -7,8 +7,11 @@ import { ProcurementsService } from '../application/procurements.service.js';
 @UseGuards(TenantGuard)
 export class ProcurementsController {
   constructor(@Inject(ProcurementsService) private readonly service: ProcurementsService) {}
-  @Get('procurements') search(@Query() query: unknown) {
-    return this.service.search(query);
+  @Get('procurements') search(
+    @Tenant() tenant: TenantContext,
+    @Query() query: unknown,
+  ) {
+    return this.service.search(query, tenant.organizationId);
   }
   @Get('procurements/:id') detail(@Param('id') id: string) {
     return this.service.detail(id);

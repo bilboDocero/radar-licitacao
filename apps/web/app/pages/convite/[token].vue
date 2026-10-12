@@ -31,5 +31,5 @@ async function accept() {
   /><UButton v-else-if="activeOrganization" :loading="busy" class="mt-6" @click="accept"
     >Aceitar vínculo comercial</UButton
   ><UButton v-else to="/onboarding" class="mt-6">Cadastre sua empresa primeiro</UButton
-  ><NuxtLink to="/app" class="block mt-6 text-sm text-emerald-700">Ir para o painel →</NuxtLink>
+  ><NuxtLink to="/app" class="block mt-6 text-sm text-primary-600 dark:text-primary-400 hover:underline">Ir para o painel →</NuxtLink>
 </template>

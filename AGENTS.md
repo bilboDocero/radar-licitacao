@@ -72,6 +72,8 @@
 - Toda citação de evidência documental da IA deve ser auditada deterministicamente com o `EvidenceVerifier`, garantindo que trechos alucinados sejam rebaixados para `inferred`.
 - Manter segregação estrita de hashes: hash de bytes do arquivo (`documentHash`), hash de texto normalizado (`extractedTextHash`) e chave de análise em cache.
 - O enriquecimento cadastral de empresas deve ocorrer exclusivamente pelo backend (`CompanyRegistryService`), utilizando BrasilAPI como fonte primária e CNPJ.ws como fallback controlado (máx. 3 req/min no Redis) com cache de 7 dias. O contrato normalizado `OrganizationRegistryView` é de leitura e não altera o perfil comercial ou regras de matching.
+- Suporte permanente a Light Mode e Dark Mode: é obrigatório validar a legibilidade e contraste de todo componente em ambos os temas. As cores oficiais da marca SellerOS são Laranja `#FF9900` (predominante em ações), Lilás `#8844FF`, Verde `#44CC88` e Azul `#4499FF`.
+- Regra de contraste WCAG 2.2 AA obrigatória: em ambos os temas, botões com fundo Laranja `#FF9900` DEVEM utilizar texto escuro (`#111827`), sendo terminantemente proibido o uso de `text-white` sobre laranja devido à reprovação de contraste (2,1:1).
 - Nunca simular pagamentos ou faturamento ativo enquanto não houver integração formal com gateway homologado.
 - Respeitar os limites do MVP definidos no roadmap.
 - Preservar a codificação UTF-8 em todos os arquivos. Não formatar os anexos `estrategia.md` e `memoria.md`.

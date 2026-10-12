@@ -119,24 +119,26 @@ async function saveCnpj() {
     <section class="panel">
       <!-- ABA: ASSINATURA -->
       <template v-if="section === 'assinatura'">
-        <UBadge color="success" variant="subtle">{{
+        <UBadge color="success" variant="subtle" size="md">{{
           data?.subscription.subscription.status === 'trial'
             ? 'Em avaliação'
             : data?.subscription.subscription.status
         }}</UBadge>
-        <h2 class="text-3xl font-semibold mt-5">Plano {{ data?.subscription.plan.name }}</h2>
-        <p class="hint mt-3">
+        <h2 class="text-3xl font-semibold mt-5 text-slate-900 dark:text-slate-100">
+          Plano {{ data?.subscription.plan.name }}
+        </h2>
+        <p class="hint mt-3 text-slate-600 dark:text-slate-400">
           Avaliação até {{ formatDate(data?.subscription.subscription.trialEndsAt || null) }}.
           Nenhuma cobrança automática.
         </p>
         <dl class="mt-7 space-y-3 text-sm">
-          <div class="flex gap-5">
-            <dt>Perfis comerciais</dt>
-            <dd>{{ data?.subscription.plan.entitlements['commercial_profiles.max_count'] }}</dd>
+          <div class="flex gap-5 py-2 border-b border-slate-100 dark:border-slate-800">
+            <dt class="text-slate-600 dark:text-slate-400 font-medium">Perfis comerciais:</dt>
+            <dd class="text-slate-900 dark:text-slate-100 font-semibold">{{ data?.subscription.plan.entitlements['commercial_profiles.max_count'] }}</dd>
           </div>
-          <div class="flex gap-5">
-            <dt>Abrangência nacional</dt>
-            <dd>
+          <div class="flex gap-5 py-2 border-b border-slate-100 dark:border-slate-800">
+            <dt class="text-slate-600 dark:text-slate-400 font-medium">Abrangência nacional:</dt>
+            <dd class="text-slate-900 dark:text-slate-100 font-semibold">
               {{
                 data?.subscription.plan.entitlements['coverage.national']
                   ? 'Disponível'
@@ -147,7 +149,8 @@ async function saveCnpj() {
         </dl>
         <UAlert
           class="mt-7"
-          color="info"
+          color="neutral"
+          variant="subtle"
           title="Contratação ainda não habilitada"
           description="O provedor de pagamentos precisa ser configurado antes da contratação de um plano pago."
         />
@@ -160,14 +163,14 @@ async function saveCnpj() {
           title="Defina onde sua empresa atua"
           description="A área comercial é configurada em cada perfil."
         >
-          <template #action><UButton to="/app/perfil-comercial">Criar perfil</UButton></template>
+          <template #action><UButton to="/app/perfil-comercial" color="primary">Criar perfil</UButton></template>
           <article
             v-for="profile in data?.profiles"
             :key="profile.id"
-            class="py-4 border-b border-slate-100"
+            class="py-4 border-b border-slate-100 dark:border-slate-800"
           >
-            <h2 class="font-semibold">{{ profile.name }}</h2>
-            <p class="hint mt-3">
+            <h2 class="font-semibold text-slate-900 dark:text-slate-100">{{ profile.name }}</h2>
+            <p class="hint mt-2 text-slate-600 dark:text-slate-400">
               {{
                 profile.coverage.national
                   ? 'Área comercial nacional'
@@ -176,20 +179,20 @@ async function saveCnpj() {
             </p>
           </article>
         </AsyncState>
-        <p class="hint mt-5">
+        <p class="hint mt-5 text-slate-500 dark:text-slate-400">
           Abrangência comercial não significa monitoramento integral de todos os portais. Veja o
           escopo em Fontes monitoradas.
         </p>
       </template>
 
-      <!-- ABA: EMPRESA (ENRIQUECIDA) -->
+      <!-- ABA: EMPRESA (ENRIQUECIDA COM CORES CLARAS NO LIGHT E ESCURAS NO DARK) -->
       <template v-else-if="section === 'empresa'">
         <div class="space-y-8">
           <!-- Cabeçalho Interno da Organização -->
-          <div class="border-b border-slate-800 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="border-b border-slate-200 dark:border-slate-800 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div class="flex items-center gap-3 flex-wrap">
-                <h2 class="text-2xl font-bold text-slate-100">{{ radar.organization.value?.name }}</h2>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100">{{ radar.organization.value?.name }}</h2>
                 <UBadge color="primary" variant="subtle" size="sm">
                   Papel: {{ radar.organization.value?.role?.toUpperCase() }}
                 </UBadge>
@@ -202,8 +205,8 @@ async function saveCnpj() {
                   {{ data.registry.registrationStatus }}
                 </UBadge>
               </div>
-              <p class="text-sm text-slate-400 mt-1">
-                Acesso vinculado ao usuário: <span class="text-slate-300 font-medium">{{ user?.email }}</span>
+              <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                Acesso vinculado ao usuário: <span class="text-slate-900 dark:text-slate-200 font-medium">{{ user?.email }}</span>
               </p>
             </div>
 
@@ -226,15 +229,15 @@ async function saveCnpj() {
           </div>
 
           <!-- SEÇÃO 1: CASO A ORGANIZAÇÃO NÃO POSSUA CNPJ -->
-          <div v-if="!data?.registry?.configured" class="p-6 rounded-xl bg-slate-900/60 border border-slate-800">
+          <div v-if="!data?.registry?.configured" class="p-6 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
             <div class="flex items-start gap-4">
-              <div class="p-3 rounded-lg bg-amber-500/10 text-amber-400">
+              <div class="p-3 rounded-lg bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400">
                 <UIcon name="i-lucide-building-2" class="w-6 h-6" />
               </div>
               <div class="space-y-4 max-w-xl">
                 <div>
-                  <h3 class="text-base font-semibold text-slate-200">CNPJ não cadastrado</h3>
-                  <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                  <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">CNPJ não cadastrado</h3>
+                  <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
                     Cadastre o CNPJ oficial da sua empresa para enriquecer automaticamente os dados cadastrais,
                     CNAEs e localização com base na Receita Federal.
                   </p>
@@ -252,15 +255,15 @@ async function saveCnpj() {
                       inputmode="numeric"
                       placeholder="00.000.000/0000-00"
                       maxlength="18"
-                      class="w-full px-3 py-2 text-sm rounded-lg bg-slate-800 border border-slate-700 text-slate-100 focus:outline-none focus:border-primary-500 font-mono"
+                      class="w-full px-3 py-2 text-sm rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-primary-500 font-mono"
                       @input="handleNewCnpjInput"
                     />
                   </div>
-                  <UButton type="submit" size="sm" :loading="savingCnpj">
+                  <UButton type="submit" size="sm" color="primary" :loading="savingCnpj">
                     Salvar CNPJ
                   </UButton>
                 </form>
-                <p v-if="cnpjError" class="text-xs text-red-400">{{ cnpjError }}</p>
+                <p v-if="cnpjError" class="text-xs text-red-600 dark:text-red-400">{{ cnpjError }}</p>
               </div>
             </div>
           </div>
@@ -269,52 +272,52 @@ async function saveCnpj() {
           <div v-else class="space-y-6">
             <!-- Grid de Identificação Principal -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div class="panel bg-slate-900/40 border border-slate-800/80">
+              <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800">
                 <p class="stat-label">CNPJ</p>
-                <p class="text-base font-semibold font-mono text-slate-200 mt-2">
+                <p class="text-base font-semibold font-mono text-slate-900 dark:text-slate-100 mt-2">
                   {{ formatCnpj(data.registry.cnpj) }}
                 </p>
-                <p class="text-[11px] text-slate-400 mt-1">
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                   {{ data.registry.establishmentType || 'Estabelecimento' }}
                 </p>
               </div>
 
-              <div class="panel bg-slate-900/40 border border-slate-800/80">
+              <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800">
                 <p class="stat-label">Razão Social</p>
-                <p class="text-sm font-semibold text-slate-200 mt-2 line-clamp-2">
+                <p class="text-sm font-semibold text-slate-900 dark:text-slate-100 mt-2 line-clamp-2">
                   {{ data.registry.legalName || radar.organization.value?.name }}
                 </p>
-                <p v-if="data.registry.tradeName" class="text-[11px] text-slate-400 mt-1 truncate">
+                <p v-if="data.registry.tradeName" class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 truncate">
                   Fantasia: {{ data.registry.tradeName }}
                 </p>
               </div>
 
-              <div class="panel bg-slate-900/40 border border-slate-800/80">
+              <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800">
                 <p class="stat-label">Porte Empresarial</p>
-                <p class="text-base font-semibold text-slate-200 mt-2">
+                <p class="text-base font-semibold text-slate-900 dark:text-slate-100 mt-2">
                   {{ data.registry.companySize || 'Não informado' }}
                 </p>
-                <p class="text-[11px] text-slate-400 mt-1">
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                   Abertura: {{ formatDate(data.registry.openedAt || null) }}
                 </p>
               </div>
 
-              <div class="panel bg-slate-900/40 border border-slate-800/80">
+              <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800">
                 <p class="stat-label">Capital Social</p>
-                <p class="text-base font-semibold text-emerald-400 mt-2">
+                <p class="text-base font-semibold text-primary-700 dark:text-primary-400 mt-2">
                   {{ data.registry.shareCapital ? formatMoney(data.registry.shareCapital) : 'Não informado' }}
                 </p>
-                <p class="text-[11px] text-slate-400 mt-1">
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                   {{ data.registry.legalNature || 'Natureza não informada' }}
                 </p>
               </div>
             </div>
 
             <!-- Atividades Econômicas (CNAE) -->
-            <div class="p-5 rounded-xl bg-slate-900/40 border border-slate-800">
+            <div class="p-5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800">
               <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                  <UIcon name="i-lucide-briefcase" class="w-4 h-4 text-primary-400" />
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <UIcon name="i-lucide-briefcase" class="w-4 h-4 text-primary-500" />
                   Atividades Econômicas (CNAE)
                 </h3>
                 <UBadge
@@ -328,19 +331,19 @@ async function saveCnpj() {
               </div>
 
               <!-- CNAE Principal -->
-              <div class="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-                <p class="text-[11px] uppercase tracking-wider text-primary-400 font-semibold mb-1">
+              <div class="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50">
+                <p class="text-[11px] uppercase tracking-wider text-primary-700 dark:text-primary-400 font-semibold mb-1">
                   Atividade Principal
                 </p>
                 <div v-if="data.registry.primaryActivity" class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                  <span class="font-mono text-xs font-semibold px-2 py-1 bg-slate-900 rounded text-slate-200">
+                  <span class="font-mono text-xs font-semibold px-2 py-1 bg-slate-200 dark:bg-slate-900 rounded text-slate-800 dark:text-slate-200">
                     {{ data.registry.primaryActivity.code }}
                   </span>
-                  <span class="text-sm text-slate-200 font-medium">
+                  <span class="text-sm text-slate-900 dark:text-slate-100 font-medium">
                     {{ data.registry.primaryActivity.description }}
                   </span>
                 </div>
-                <p v-else class="text-xs text-slate-400">Atividade principal não informada.</p>
+                <p v-else class="text-xs text-slate-500 dark:text-slate-400">Atividade principal não informada.</p>
               </div>
 
               <!-- CNAEs Secundários -->
@@ -349,12 +352,12 @@ async function saveCnpj() {
                   <div
                     v-for="(cnae, idx) in (showAllSecondary ? data.registry.secondaryActivities : data.registry.secondaryActivities.slice(0, 3))"
                     :key="idx"
-                    class="flex items-start gap-3 p-2.5 rounded bg-slate-800/30 text-xs"
+                    class="flex items-start gap-3 p-2.5 rounded bg-slate-50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800/80 text-xs"
                   >
-                    <span class="font-mono text-[11px] text-slate-400 shrink-0 font-medium">
+                    <span class="font-mono text-[11px] text-slate-600 dark:text-slate-400 shrink-0 font-semibold">
                       {{ cnae.code }}
                     </span>
-                    <span class="text-slate-300">{{ cnae.description }}</span>
+                    <span class="text-slate-800 dark:text-slate-200">{{ cnae.description }}</span>
                   </div>
                 </div>
 
@@ -375,46 +378,46 @@ async function saveCnpj() {
             <!-- Localização e Informações de Contato -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Endereço -->
-              <div class="p-5 rounded-xl bg-slate-900/40 border border-slate-800">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2 mb-3">
-                  <UIcon name="i-lucide-map-pin" class="w-4 h-4 text-primary-400" />
+              <div class="p-5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2 mb-3">
+                  <UIcon name="i-lucide-map-pin" class="w-4 h-4 text-primary-500" />
                   Localização da Sede
                 </h3>
-                <dl class="space-y-2 text-xs text-slate-300">
-                  <div class="flex justify-between py-1 border-b border-slate-800">
-                    <dt class="text-slate-500">Logradouro:</dt>
-                    <dd class="text-right font-medium">
+                <dl class="space-y-2 text-xs text-slate-700 dark:text-slate-300">
+                  <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800">
+                    <dt class="text-slate-500 dark:text-slate-400">Logradouro:</dt>
+                    <dd class="text-right font-medium text-slate-900 dark:text-slate-100">
                       {{ data.registry.address?.street || 'Não informado' }}
                       {{ data.registry.address?.number ? `, nº ${data.registry.address.number}` : '' }}
                       {{ data.registry.address?.complement ? ` (${data.registry.address.complement})` : '' }}
                     </dd>
                   </div>
-                  <div class="flex justify-between py-1 border-b border-slate-800">
-                    <dt class="text-slate-500">Bairro:</dt>
-                    <dd class="text-right font-medium">{{ data.registry.address?.neighborhood || 'Não informado' }}</dd>
+                  <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800">
+                    <dt class="text-slate-500 dark:text-slate-400">Bairro:</dt>
+                    <dd class="text-right font-medium text-slate-900 dark:text-slate-100">{{ data.registry.address?.neighborhood || 'Não informado' }}</dd>
                   </div>
-                  <div class="flex justify-between py-1 border-b border-slate-800">
-                    <dt class="text-slate-500">Município / UF:</dt>
-                    <dd class="text-right font-medium">
+                  <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800">
+                    <dt class="text-slate-500 dark:text-slate-400">Município / UF:</dt>
+                    <dd class="text-right font-medium text-slate-900 dark:text-slate-100">
                       {{ data.registry.address?.city || 'Não informado' }} / {{ data.registry.address?.state || 'UF' }}
                     </dd>
                   </div>
-                  <div class="flex justify-between py-1">
-                    <dt class="text-slate-500">CEP:</dt>
-                    <dd class="text-right font-mono font-medium">{{ formatCep(data.registry.address?.postalCode) }}</dd>
+                  <div class="flex justify-between py-1.5">
+                    <dt class="text-slate-500 dark:text-slate-400">CEP:</dt>
+                    <dd class="text-right font-mono font-medium text-slate-900 dark:text-slate-100">{{ formatCep(data.registry.address?.postalCode) }}</dd>
                   </div>
                 </dl>
               </div>
 
               <!-- Informações Tributárias e Contato -->
-              <div class="p-5 rounded-xl bg-slate-900/40 border border-slate-800">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2 mb-3">
-                  <UIcon name="i-lucide-info" class="w-4 h-4 text-primary-400" />
+              <div class="p-5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2 mb-3">
+                  <UIcon name="i-lucide-info" class="w-4 h-4 text-primary-500" />
                   Regime Tributário & Contato
                 </h3>
-                <dl class="space-y-2 text-xs text-slate-300">
-                  <div class="flex justify-between py-1 border-b border-slate-800">
-                    <dt class="text-slate-500">Simples Nacional:</dt>
+                <dl class="space-y-2 text-xs text-slate-700 dark:text-slate-300">
+                  <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800 items-center">
+                    <dt class="text-slate-500 dark:text-slate-400">Simples Nacional:</dt>
                     <dd class="font-medium">
                       <UBadge
                         :color="data.registry.simpleTaxRegime === true ? 'success' : 'neutral'"
@@ -425,8 +428,8 @@ async function saveCnpj() {
                       </UBadge>
                     </dd>
                   </div>
-                  <div class="flex justify-between py-1 border-b border-slate-800">
-                    <dt class="text-slate-500">Enquadramento MEI:</dt>
+                  <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800 items-center">
+                    <dt class="text-slate-500 dark:text-slate-400">Enquadramento MEI:</dt>
                     <dd class="font-medium">
                       <UBadge
                         :color="data.registry.mei === true ? 'success' : 'neutral'"
@@ -437,26 +440,26 @@ async function saveCnpj() {
                       </UBadge>
                     </dd>
                   </div>
-                  <div class="flex justify-between py-1 border-b border-slate-800">
-                    <dt class="text-slate-500">E-mail público:</dt>
-                    <dd class="text-right font-medium">{{ data.registry.email || 'Não informado' }}</dd>
+                  <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800">
+                    <dt class="text-slate-500 dark:text-slate-400">E-mail público:</dt>
+                    <dd class="text-right font-medium text-slate-900 dark:text-slate-100">{{ data.registry.email || 'Não informado' }}</dd>
                   </div>
-                  <div class="flex justify-between py-1">
-                    <dt class="text-slate-500">Telefone:</dt>
-                    <dd class="text-right font-medium">{{ formatPhone(data.registry.phone) }}</dd>
+                  <div class="flex justify-between py-1.5">
+                    <dt class="text-slate-500 dark:text-slate-400">Telefone:</dt>
+                    <dd class="text-right font-medium text-slate-900 dark:text-slate-100">{{ formatPhone(data.registry.phone) }}</dd>
                   </div>
                 </dl>
               </div>
             </div>
 
             <!-- Metadados de Origem da Consulta -->
-            <div class="p-3 rounded-lg bg-slate-900/30 border border-slate-800/60 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-400 gap-2">
+            <div class="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-800/60 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 gap-2">
               <div class="flex items-center gap-2">
                 <span>Fonte cadastral:</span>
                 <UBadge size="xs" variant="outline" color="neutral">
                   {{ data.registry.source === 'brasilapi' ? 'BrasilAPI (Receita Federal)' : data.registry.source === 'cnpjws' ? 'CNPJ.ws (Receita Federal)' : 'Mock local' }}
                 </UBadge>
-                <span v-if="data.registry.isCached" class="text-emerald-400">· Em cache (7 dias)</span>
+                <span v-if="data.registry.isCached" class="text-primary-700 dark:text-primary-400 font-medium">· Em cache (7 dias)</span>
               </div>
               <div>
                 Última consulta: {{ new Date(data.registry.fetchedAt || '').toLocaleString('pt-BR') }}
@@ -468,10 +471,10 @@ async function saveCnpj() {
 
       <!-- ABA: CONFIGURAÇÕES -->
       <template v-else-if="section === 'configuracoes'">
-        <h2 class="panel-title">{{ user?.name }}</h2>
-        <p class="hint">{{ user?.email }}</p>
-        <UButton to="/recuperar-senha" variant="outline" class="mt-5">Gerenciar senha</UButton>
-        <p class="hint mt-5">
+        <h2 class="panel-title text-slate-900 dark:text-slate-100">{{ user?.name }}</h2>
+        <p class="hint text-slate-600 dark:text-slate-400">{{ user?.email }}</p>
+        <UButton to="/recuperar-senha" variant="outline" color="neutral" class="mt-5">Gerenciar senha</UButton>
+        <p class="hint mt-5 text-slate-500 dark:text-slate-400">
           A seleção da empresa ativa está no cabeçalho. A troca de tema também está disponível no
           cabeçalho.
         </p>
@@ -479,24 +482,24 @@ async function saveCnpj() {
 
       <!-- ABA: AJUDA -->
       <template v-else>
-        <ol class="space-y-5 text-sm">
+        <ol class="space-y-5 text-sm text-slate-700 dark:text-slate-300">
           <li>
             1. Cadastre um
-            <NuxtLink to="/app/perfil-comercial" class="text-emerald-700 underline">
+            <NuxtLink to="/app/perfil-comercial" class="text-primary-600 dark:text-primary-400 underline font-medium">
               perfil comercial
             </NuxtLink>
             com palavras-chave e região.
           </li>
           <li>
             2. Explore o
-            <NuxtLink to="/app/radar" class="text-emerald-700 underline">
+            <NuxtLink to="/app/radar" class="text-primary-600 dark:text-primary-400 underline font-medium">
               catálogo de oportunidades
             </NuxtLink>.
           </li>
           <li>3. Salve licitações e acompanhe as notificações.</li>
           <li>4. Consulte sempre o edital no portal oficial antes de participar.</li>
         </ol>
-        <UButton to="/faq" variant="outline" class="mt-7">Perguntas frequentes</UButton>
+        <UButton to="/faq" variant="outline" color="neutral" class="mt-7">Perguntas frequentes</UButton>
       </template>
     </section>
   </AsyncState>

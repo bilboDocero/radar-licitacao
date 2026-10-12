@@ -37,7 +37,7 @@ useSeoMeta({ title: () => item.value[0] });
     class="mt-8"
     trailing-icon="i-lucide-arrow-right"
     >{{ item[2] }}</UButton
-  ><NuxtLink to="/entrar" class="text-sm text-emerald-700 block mt-6 text-center"
+  ><NuxtLink to="/entrar" class="text-sm text-primary-600 dark:text-primary-400 block mt-6 text-center hover:underline"
     >Voltar para o acesso</NuxtLink
   >
 </template>

@@ -1,17 +1,42 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { and, eq, ilike, gt, desc, sql } from 'drizzle-orm';
-import { procurements, procurementVersions, savedProcurements } from '@radar/database';
+import { and, eq, ilike, gt, desc, sql, inArray } from 'drizzle-orm';
+import { procurements, procurementVersions, savedProcurements, commercialProfiles } from '@radar/database';
 import { searchInput, type TenantContext } from '@radar/contracts';
 import { DatabaseService } from '../../../common/database.module.js';
 import { parse, uuid } from '../../../common/http.js';
 @Injectable()
 export class ProcurementsService {
   constructor(@Inject(DatabaseService) private readonly database: DatabaseService) {}
-  async search(query: unknown) {
+  async search(query: unknown, organizationId?: string) {
     const search = parse(searchInput, query);
+
+    let profileStates: string[] | undefined;
+    let isNational = true;
+    if (organizationId) {
+      const profile = await this.database.db.query.commercialProfiles.findFirst({
+        where: eq(commercialProfiles.organizationId, organizationId),
+      });
+      if (profile) {
+        isNational = profile.coverage.national;
+        profileStates = profile.coverage.states;
+      }
+    }
+
+    const applyProfileScope =
+      !isNational &&
+      Boolean(profileStates && profileStates.length > 0) &&
+      search.uf !== 'all';
+
+    const ufFilter =
+      search.uf && search.uf !== 'all' && search.uf !== 'scope'
+        ? eq(procurements.agencyState, search.uf)
+        : applyProfileScope && profileStates && profileStates.length > 0
+          ? inArray(procurements.agencyState, profileStates)
+          : undefined;
+
     const where = and(
       search.q ? ilike(procurements.title, `%${search.q.replace(/[%_\\]/g, '\\$&')}%`) : undefined,
-      search.uf ? eq(procurements.agencyState, search.uf) : undefined,
+      ufFilter,
       search.open === 'true'
         ? and(eq(procurements.status, 'open'), gt(procurements.deadline, new Date()))
         : undefined,
