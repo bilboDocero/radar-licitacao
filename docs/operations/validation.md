@@ -13,11 +13,13 @@ pnpm -r --filter "./packages/*" --filter "./apps/*" run typecheck
 ```
 - **Resultado Observado:** Aprovado em todos os 6 pacotes (`@radar/contracts`, `@radar/database`, `@radar/events`, `@radar/source-sdk`, `@radar/config`, `@radar/document-intelligence`) e 4 aplicações (`@radar/web`, `@radar/api`, `@radar/collector`, `@radar/worker`) com **0 erros**.
 
-### 1.2. Testes Unitários de Domínio (Vitest)
+### 1.2. Testes Unitários de Domínio e Segurança (Vitest)
 ```bash
 pnpm test
 ```
-- **Resultado Observado:** 4 arquivos de teste e 35 testes aprovados (100% de sucesso):
+- **Resultado Observado:** 6 arquivos de teste e 60 testes aprovados (100% de sucesso):
+  - `tests/unit/ssrf-security.test.ts` (13 testes): bloqueio de IPs privados, loopback (IPv4/IPv6), link-local/cloud metadata (169.254.169.254), protocolos não-HTTP, credenciais embutidas, portas anômalas, DNS rebinding e limite de download seguro (maxBytes).
+  - `tests/unit/document-pipeline.test.ts` (12 testes): segmentação temática com metadados estruturados de chunking (id, ordem, hash, páginas, tokens), extração de texto em buffer, auditoria e rebaixamento de citações alucinadas com `EvidenceVerifier`, e simulação de falhas do `MockAIProvider` (timeout, rate limit 429, 503, JSON malformado e failover do router).
   - `tests/unit/collector.test.ts` (10 testes): hashing canônico estável, proteção SSRF de URLs, normalização do fuso de Brasília e paginação do PNCP.
   - `tests/unit/matching.test.ts` (10 testes): algoritmo determinístico de matching, prioridade de local de execução vs. sede do órgão, normalização de acentos e descarte de prazos vencidos.
   - `tests/unit/document-intelligence.test.ts` (8 testes): Mock AI Provider, geração de Opportunity Briefs, roteador com failover automático, segmentação de seções documentais e avaliação com editais reais (TI, Obras e órgãos sem local definido).

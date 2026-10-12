@@ -7,3 +7,4 @@ export * from './services/usage-tracker.service.js';
 export * from './services/document-extraction.service.js';
 export * from './services/procurement-analyzer.service.js';
 export * from './services/opportunity-brief.service.js';
+export * from './services/evidence-verifier.service.js';

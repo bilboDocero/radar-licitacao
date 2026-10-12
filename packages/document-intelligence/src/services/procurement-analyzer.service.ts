@@ -13,6 +13,7 @@ import {
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { AIModelRouter } from '../router/model-router.js';
 import { DocumentExtractionService } from './document-extraction.service.js';
+import { EvidenceVerifier } from './evidence-verifier.service.js';
 import { logger } from '@radar/config';
 
 export class ProcurementAnalyzer {
@@ -77,7 +78,7 @@ export class ProcurementAnalyzer {
         : 'LOCAL DE EXECUÇÃO: Não especificado no resumo (usar sede como fallback administrativo)',
     ].join('\n');
 
-    await this.extractionService.extractAndStore({
+    const extraction = await this.extractionService.extractAndStore({
       procurementId,
       sourceDocumentUrl: procurement.officialUrl,
       name: `Edital-${procurement.externalId}.txt`,
@@ -117,6 +118,16 @@ REGRAS DE SEGURANÇA E FIDELIDADE:
     );
 
     const extracted = response.data;
+
+    // Verificação determinística e cruzada de evidências citadas pela IA
+    const verified = EvidenceVerifier.verifyEvidence({
+      requirements: extracted.requirements,
+      risks: extracted.risks,
+      extractedText: extraction.extractedText,
+      sections: extraction.sections,
+      pageCount: extraction.pageCount,
+    });
+
     const analysisData: ProcurementAIAnalysis = {
       procurementId,
       version,
@@ -126,8 +137,8 @@ REGRAS DE SEGURANÇA E FIDELIDADE:
       promptVersion: '1.0.0',
       summary: extracted.summary,
       executionPlace: extracted.executionPlace,
-      requirements: extracted.requirements,
-      risks: extracted.risks,
+      requirements: verified.requirements,
+      risks: verified.risks,
       unverifiedPoints: extracted.unverifiedPoints,
       analyzedAt: new Date().toISOString(),
     };

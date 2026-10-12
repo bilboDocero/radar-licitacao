@@ -47,22 +47,28 @@ Abstração padronizada para invocar modelos de linguagem com saída JSON Schema
 - Realiza failover automático para o provedor configurado em `AI_FALLBACK_PROVIDER` caso o primário responda com erro temporário de rate limit (429) ou erro de servidor (5xx).
 - Valida o orçamento com o `AIUsageTracker` antes de disparar chamadas pagas.
 
-### 2.3. `DocumentExtractionService` (Pipeline Documental)
-- Baixa e segmenta o edital em seções temáticas (Objeto, Habilitação, Prazos, Execução, Sanções).
-- Gera hash estável do conteúdo para detecção de duplicidades.
-- Aplica salvaguarda contra SSRF (`assertApprovedUrl`).
+### 2.3. `DocumentExtractionService` (Pipeline Documental e PDF)
+- Baixa documentos usando o cliente seguro `safeDownloadFile` com proteção estrita contra SSRF, checagem de DNS e limite de 20 MB.
+- Converte arquivos PDF binários em texto página por página via `unpdf`, detectando páginas digitalizadas (scanned) que necessitam de OCR.
+- Segmenta o texto em seções temáticas (Objeto, Habilitação, Prazos, Sanções) com metadados estruturados de chunking (id, ordem, páginas, hash do trecho e estimativa de tokens).
+- Calcula hashes multinível: hash de bytes do arquivo (`documentHash`), hash de texto normalizado (`extractedTextHash`) e hashes de segmentos.
 
-### 2.4. `ProcurementAnalyzer` (Análise de Requisitos)
+### 2.4. `EvidenceVerifier` (Auditoria Determinística de Evidências)
+- Analisa as citações (`textExcerpt`) e páginas retornadas pela LLM contra o texto bruto extraído do edital.
+- Trechos confirmados literalmente mantêm o status `extracted` e confiança alta (`high`).
+- Citações não localizadas no texto do edital são rebaixadas preventivamente para `inferred` com confiança baixa (`low`) e nota de auditoria explícita, impedindo que alucinações da IA sejam exibidas como fatos confirmados.
+
+### 2.5. `ProcurementAnalyzer` (Análise de Requisitos)
 - Constrói prompts estruturados com instruções explícitas de mitigação de prompt injection.
 - Valida e persiste os requisitos fáticos extraídos em `procurement_ai_analyses`.
 - Garante o **processamento compartilhado**: a mesma versão de edital é analisada apenas uma vez, independentemente de quantas empresas a receberem.
 
-### 2.5. `OpportunityBriefService` (Brief Personalizado)
+### 2.6. `OpportunityBriefService` (Brief Personalizado)
 - Cruza a análise documental pública com o perfil comercial privado da empresa (palavras-chave, categorias e cobertura geográfica).
 - Produz uma pontuação de aderência comercial (0 a 100), nível de compatibilidade, justificativas, pontos fortes, lacunas e próximos passos sugeridos.
 - Salva o brief isolado em `opportunity_briefs` com chave única por `(organizationId, profileId, procurementId)`.
 
-### 2.6. `AIUsageTracker` (Auditoria e Custos)
+### 2.7. `AIUsageTracker` (Auditoria e Custos)
 - Registra cada invocação de IA em `ai_usage_records` com tokens de entrada/saída, latência e custo calculado em USD.
 - Bloqueia novas chamadas se o gasto do dia ou do mês exceder os limites configurados (`AI_DAILY_BUDGET_USD` / `AI_MONTHLY_BUDGET_USD`).
 
