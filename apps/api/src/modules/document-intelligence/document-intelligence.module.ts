@@ -9,18 +9,9 @@ import {
   UseGuards,
   NotFoundException,
 } from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
-import {
-  procurements,
-  commercialProfiles,
-  procurementAIAnalyses,
-  opportunityBriefs,
-} from '@radar/database';
-import {
-  type TenantContext,
-  procurementAIAnalysisSchema,
-  opportunityBriefSchema,
-} from '@radar/contracts';
+import { eq } from 'drizzle-orm';
+import { procurements, commercialProfiles } from '@radar/database';
+import { type TenantContext } from '@radar/contracts';
 import { environment } from '@radar/config';
 import {
   MockAIProvider,
@@ -68,32 +59,7 @@ export class DocumentIntelligenceService {
       throw new NotFoundException('Licitação não encontrada');
     }
 
-    const analysis = await this.database.db.query.procurementAIAnalyses.findFirst({
-      where: and(
-        eq(procurementAIAnalyses.procurementId, procurementId),
-        eq(procurementAIAnalyses.version, procurement.version),
-      ),
-    });
-
-    if (!analysis) {
-      // If not yet analyzed, generate analysis on demand
-      return this.analyzer.analyze(procurementId, procurement.version);
-    }
-
-    return procurementAIAnalysisSchema.parse({
-      procurementId: analysis.procurementId,
-      version: analysis.version,
-      status: analysis.status,
-      model: analysis.model,
-      provider: analysis.provider,
-      promptVersion: analysis.promptVersion,
-      summary: analysis.summary,
-      executionPlace: analysis.executionPlace,
-      requirements: analysis.requirements,
-      risks: analysis.risks,
-      unverifiedPoints: analysis.unverifiedPoints,
-      analyzedAt: analysis.createdAt.toISOString(),
-    });
+    return this.analyzer.analyze(procurementId, procurement.version);
   }
 
   async getOpportunityBrief(organizationId: string, procurementId: string) {
@@ -140,7 +106,7 @@ export class DocumentIntelligenceController {
   @Manage()
   @Post('procurements/:id/analyze')
   triggerAnalysis(@Param('id') id: string) {
-    return this.service.analyzer.analyze(id);
+    return this.service.analyzer.analyze(id, undefined, true);
   }
 
   @PlatformAdmin()

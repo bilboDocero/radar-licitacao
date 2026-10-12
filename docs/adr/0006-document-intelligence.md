@@ -1,5 +1,7 @@
 # ADR 0006 — Inteligência Documental e Arquitetura Multi-Provider de IA
 
+> Nota de revisão — 12/10/2026: esta ADR registra a intenção arquitetural original. O fluxo atual envia metadados ao Gemini, sem descoberta/download de PDFs. A API pode aguardar análise e o worker de matching aguarda geração de briefs; o desacoplamento completo abaixo ainda não foi entregue. A [ADR 0007](0007-document-analysis-mvp.md) delimita a evolução sob demanda. Implementação observada e limitações em [arquitetura de IA](../architecture/ai-architecture.md).
+
 ## Contexto
 O Radar de Licitações necessita processar editais públicos e termos de referência para extrair requisitos de habilitação, critérios técnicos e pontos de atenção, gerando um Opportunity Brief personalizado para o assinante. A solução não pode depender de um único provedor proprietário de IA, não pode onerar o orçamento descontroladamente e não deve atrasar a notificação inicial de descoberta gerada pelo matching determinístico.
 

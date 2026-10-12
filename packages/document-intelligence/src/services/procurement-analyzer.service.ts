@@ -1,9 +1,5 @@
 import { and, eq } from 'drizzle-orm';
-import {
-  procurements,
-  procurementAIAnalyses,
-  type Database,
-} from '@radar/database';
+import { procurements, procurementAIAnalyses, type Database } from '@radar/database';
 import {
   procurementAIAnalysisSchema,
   tenderRequirementsExtractionSchema,
@@ -23,7 +19,11 @@ export class ProcurementAnalyzer {
     private readonly extractionService: DocumentExtractionService,
   ) {}
 
-  async analyze(procurementId: string, forcedVersion?: number): Promise<ProcurementAIAnalysis> {
+  async analyze(
+    procurementId: string,
+    forcedVersion?: number,
+    force = false,
+  ): Promise<ProcurementAIAnalysis> {
     const procurement = await this.db.query.procurements.findFirst({
       where: eq(procurements.id, procurementId),
     });
@@ -42,7 +42,14 @@ export class ProcurementAnalyzer {
       ),
     });
 
-    if (existing && existing.status === 'COMPLETED') {
+    const target = this.router.resolveModelAndProvider('document.requirements_extraction');
+    if (
+      !force &&
+      existing?.status === 'COMPLETED' &&
+      existing.provider === target.providerId &&
+      existing.model === target.model &&
+      existing.promptVersion === '1.0.0'
+    ) {
       logger.info(
         { procurementId, version },
         'Reaproveitando análise documental compartilhada existente',
@@ -59,7 +66,7 @@ export class ProcurementAnalyzer {
         requirements: existing.requirements,
         risks: existing.risks,
         unverifiedPoints: existing.unverifiedPoints,
-        analyzedAt: existing.createdAt.toISOString(),
+        analyzedAt: existing.updatedAt.toISOString(),
       });
     }
 

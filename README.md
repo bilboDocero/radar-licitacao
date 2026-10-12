@@ -30,6 +30,19 @@ Conta local de demonstração: `demo@radar.local` / `RadarLocal123!`. Administra
 
 Para testar cadastro, crie uma conta em `/cadastro`, abra o Mailpit para confirmar o e-mail e cadastre sua empresa. A avaliação de 14 dias no plano Nacional é explicitamente gratuita. Nenhuma cobrança ou ativação paga é simulada.
 
+### Após atualizar o código ou se o login indicar API indisponível
+
+Com o Docker Desktop aberto, encerre o `pnpm dev` anterior e execute na raiz:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm infra:up
+pnpm db:migrate
+pnpm dev
+```
+
+Em outro terminal, execute `pnpm health`. A página inicial na porta 3000 pode funcionar mesmo com a API na porta 4000 parada. Se aparecer `ERR_MODULE_NOT_FOUND` para um pacote `@radar/*`, a instalação acima refaz os vínculos dos pacotes internos. Reinicie o desenvolvimento após instalar. Uma base já cadastrada não precisa ser apagada ou recriada para recuperar o login; mantenha o `.env` existente e os volumes do Docker.
+
 ## Comandos
 
 ```bash
@@ -80,4 +93,4 @@ Consulte [AGENTS.md](AGENTS.md), [arquitetura](docs/architecture/overview.md), [
 
 ## Limites desta entrega
 
-Pagamentos, alertas externos, edição completa de cadastros, gestão de membros, todos os municípios IBGE, documentos/OCR/IA e white label permanecem pendentes. As páginas correspondentes informam suas limitações. Termos e privacidade são minutas locais e precisam de revisão antes do lançamento. Build e testes aprovados não equivalem a prontidão comercial.
+Pagamentos, alertas externos, edição completa de cadastros, gestão de membros, todos os municípios IBGE e white label permanecem pendentes. A IA real com Gemini está validada para os metadados cadastrados; leitura do edital em PDF e anexos ainda não está conectada ao fluxo, e OCR permanece pendente. A próxima entrega está definida no [MVP de análise documental com evidências](docs/roadmap/document-analysis-mvp.md). Termos e privacidade são minutas locais e precisam de revisão antes do lançamento. Build e testes aprovados não equivalem a prontidão comercial.

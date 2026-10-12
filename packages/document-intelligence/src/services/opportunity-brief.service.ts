@@ -6,10 +6,7 @@ import {
   procurementAIAnalyses,
   type Database,
 } from '@radar/database';
-import {
-  opportunityBriefSchema,
-  type OpportunityBrief,
-} from '@radar/contracts';
+import { opportunityBriefSchema, type OpportunityBrief } from '@radar/contracts';
 import { ProcurementAnalyzer } from './procurement-analyzer.service.js';
 import { logger } from '@radar/config';
 
@@ -44,22 +41,13 @@ export class OpportunityBriefService {
     }
 
     // Ensure edital AI analysis exists (or execute shared analysis now)
-    let analysis = await this.db.query.procurementAIAnalyses.findFirst({
+    await this.analyzer.analyze(procurementId, procurement.version);
+    const analysis = await this.db.query.procurementAIAnalyses.findFirst({
       where: and(
         eq(procurementAIAnalyses.procurementId, procurementId),
         eq(procurementAIAnalyses.version, procurement.version),
       ),
     });
-
-    if (!analysis || analysis.status !== 'COMPLETED') {
-      await this.analyzer.analyze(procurementId, procurement.version);
-      analysis = await this.db.query.procurementAIAnalyses.findFirst({
-        where: and(
-          eq(procurementAIAnalyses.procurementId, procurementId),
-          eq(procurementAIAnalyses.version, procurement.version),
-        ),
-      });
-    }
 
     // Determine geographic compatibility
     const basis = profile.coverage.national
@@ -74,7 +62,7 @@ export class OpportunityBriefService {
 
     const geoCompatible =
       profile.coverage.national ||
-      profile.coverage.states.includes(uf as any) ||
+      profile.coverage.states.includes(uf as (typeof profile.coverage.states)[number]) ||
       profile.coverage.municipalities.includes(municipality || '');
 
     const geoExplanation =
@@ -111,7 +99,9 @@ export class OpportunityBriefService {
       strengths.push(`Categoria comercial compatível: ${procurement.category}.`);
     }
     if (geoCompatible) {
-      strengths.push(`Área de atuação compatível (${basis === 'agency' ? 'sede do órgão' : 'entrega'}).`);
+      strengths.push(
+        `Área de atuação compatível (${basis === 'agency' ? 'sede do órgão' : 'entrega'}).`,
+      );
     }
 
     const gaps: string[] = [];
@@ -126,7 +116,9 @@ export class OpportunityBriefService {
 
     const matchingReasons = [
       ...strengths,
-      procurement.deadline ? `Prazo de envio até ${procurement.deadline.toLocaleDateString('pt-BR')}` : 'Prazo de envio aberto',
+      procurement.deadline
+        ? `Prazo de envio até ${procurement.deadline.toLocaleDateString('pt-BR')}`
+        : 'Prazo de envio aberto',
     ];
 
     const suggestedNextSteps = [
@@ -156,9 +148,9 @@ export class OpportunityBriefService {
         strengths,
         gaps,
       },
-      keyRequirements: (analysis?.requirements as any) || [],
-      risksAndCautions: (analysis?.risks as any) || [],
-      unverifiedInformation: (analysis?.unverifiedPoints as any) || [],
+      keyRequirements: analysis?.requirements || [],
+      risksAndCautions: analysis?.risks || [],
+      unverifiedInformation: analysis?.unverifiedPoints || [],
       suggestedNextSteps,
       officialLinks: [
         {
@@ -227,6 +219,12 @@ export class OpportunityBriefService {
     });
 
     if (!brief) return null;
+
+    // A provider/model change or manual reanalysis must also refresh the company's brief.
+    const analysis = await this.analyzer.analyze(procurementId);
+    if (new Date(analysis.analyzedAt).getTime() > brief.updatedAt.getTime()) {
+      return this.generateBrief({ organizationId, procurementId, profileId: brief.profileId });
+    }
 
     return opportunityBriefSchema.parse({
       id: brief.id,

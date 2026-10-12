@@ -5,7 +5,7 @@
 - **Projeto:** Radar de Licitações Públicas (SaaS B2B2C)
 - **Data da última revisão:** 12 de outubro de 2026
 - **Branch analisada:** `main`
-- **Commit analisado:** `820e163` (`initial implement`)
+- **Commit da verificação operacional mais recente:** `6f2f39d` (`style(theme): padronizar design system SellerOS, contraste WCAG AA e suporte a light/dark mode`). A auditoria arquitetural original partiu de `820e163`.
 - **Estágio de maturidade:** MVP (Esqueleto funcional com pendências comerciais e operacionais)
 - **Fontes consultadas:**
   - Código-fonte das aplicações em `apps/` (`web`, `api`, `collector`, `worker`)
@@ -18,12 +18,28 @@
   - Histórico do Git (`git log`, `git branch -a`, `git status`)
 - **Limitações da verificação:**
   - **Board de desenvolvimento:** Nenhum board (GitHub Projects, Jira ou Linear) foi identificado ou configurado no repositório; utilitário `gh` CLI não está instalado no ambiente operacional.
-  - **Docker local:** O daemon do Docker Desktop encontrava-se inativo durante a auditoria local, impedindo a subida dos containers de infraestrutura (`postgres`, `redis`, `keycloak`, `mailpit`).
-  - **Instalação local e execução completa:** Todos os testes unitários (28 testes), testes de integração em banco isolado temporário (7 testes), testes E2E com Playwright (3 testes), healthcheck de serviços locais e smoke test de IA foram executados ao vivo nesta sessão com 100% de sucesso. A infraestrutura de Docker local (`postgres`, `redis`, `keycloak`, `mailpit`) e as aplicações em segundo plano (`web`, `api`, `worker`, `collector`) encontram-se em execução e saudáveis.
+  - **Docker local:** Na verificação de recuperação do login em 12/10/2026, PostgreSQL, Redis, Keycloak e Mailpit estavam em execução. A indisponibilidade estava na API, que não iniciava por ausência do vínculo local de `@radar/document-intelligence`.
+  - **Verificação operacional mais recente:** `pnpm install --frozen-lockfile`, `pnpm db:migrate` e reinicialização de `pnpm dev` recuperaram a API e iniciaram web, collector e worker. A migration aditiva `0002_wild_maelstrom.sql` estava pendente e foi aplicada, preservando os cadastros. Healthcheck HTTP dos quatro serviços aprovado; login OIDC com a conta local existente `demo@radar.local` validado em Chromium, com 3 empresas vinculadas, sessão preservada após recarregar e nenhum erro JavaScript observado. Os resultados das demais suítes abaixo são históricos e não foram reexecutados nesta recuperação operacional.
 
 ---
 
 ## 2. Resumo executivo
+
+### Próxima evolução documental — planejada em 12/10/2026
+
+Estado da integração PDF ponta a ponta: **NOT_STARTED**. O [escopo mínimo de análise documental](roadmap/document-analysis-mvp.md) e a [ADR 0007](adr/0007-document-analysis-mvp.md) definem resumo de decisão com evidências, cinco blocos, edital/termo de referência em PDF textual, processamento inicialmente sob demanda, fila dedicada e controle de custo. OCR, tabelas complexas, chat e comprovação de habilitação ficam fora do primeiro incremento.
+
+O próximo passo é homologar descoberta de documentos PNCP e seu inventário, seguido de extração confiável, evidências, fila/cache e avaliação manual de qualidade. Limites quantitativos, retenção e limiares de qualidade serão definidos com medição antes da liberação. Nenhuma dessas etapas foi implementada nesta atualização de documentação.
+
+As descrições históricas de IA como domínio integralmente validado não comprovam leitura de PDFs no fluxo. A [arquitetura revisada](architecture/ai-architecture.md) registra o comportamento observado e suas lacunas; ela deve orientar a próxima entrega junto ao código.
+
+### Verificação do fluxo de análise com Gemini — 12/10/2026
+
+- O ambiente local foi configurado pelo usuário com Gemini (`gemini-3.5-flash-lite`); chamada real estruturada validada e resultado confirmado no navegador em uma licitação PNCP existente. As chaves permanecem exclusivamente no `.env` ignorado pelo Git.
+- Após a validação inicial, as duas análises mock restantes foram regeneradas com Gemini e os três briefs existentes atualizados. Na conferência dessa operação havia três análises reais e nenhuma análise mock; isso é evidência local datada, não uma migration nem garantia sobre dados futuros.
+- O cache da análise agora exige a mesma versão da licitação, provedor, modelo e versão do prompt. Resultados antigos de `mock` são regenerados sob demanda quando o provedor muda. O botão de reanálise força uma nova chamada; briefs anteriores são regenerados quando a análise compartilhada é atualizada, preservando organização e perfil.
+- **Limitação confirmada no código:** o fluxo de `/app/licitacoes/:id` envia somente os dados cadastrais da licitação ao modelo. O método de download/extração de PDF existe, mas não está conectado ao `ProcurementAnalyzer`. A ativação do Gemini não representa leitura integral do edital/anexos, OCR ou validação documental da empresa. A pontuação comercial continua baseada em regras fixas.
+- Validação desta alteração: 74 testes unitários aprovados (5 novos sobre cache), typecheck e build aprovados, lint dos arquivos alterados aprovado e fluxo autenticado de análise/brief aprovado. Lint global permanece com 37 erros em outros arquivos. A execução da integração em banco temporário foi recusada pelo usuário e não foi repetida.
 
 O projeto encontra-se no estágio de **Esqueleto Funcional do MVP com Inteligência Documental Integrada**, com um fluxo vertical ponta a ponta plenamente codificado no padrão monorepo em TypeScript strict (pnpm + Turborepo).
 
@@ -57,7 +73,7 @@ A plataforma conta com:
 | **Fontes e coleta** | `IN_PROGRESS` | `SourceConnector`, `PncpConnector` com fetch nativo, controle de taxa, retry exponencial, lock consultivo transacional, deduplicação por hash estável e versionamento. | Apenas modalidades 6 e 8 do PNCP; agendamento horário desativado por padrão; sem ingestão de anexos/editais (PDFs); sem conectores adicionais ativos. | Ampliar modalidades do PNCP, habilitar agendamento monitorado e homologar novos portais. |
 | **Licitações** | `IMPLEMENTED` | Catálogo global em `procurements`, busca paginada com filtros (`q`, `uf`, status), rastreabilidade de versões, detalhe oficial e favoritos privados (`saved_procurements`). | Sem download, indexação ou OCR de documentos anexos; locais de execução e categorias dependem de metadados do PNCP. | Implementar extração e persistência de itens licitados e locais de execução detalhados. |
 | **Matching** | `VALIDATED` | Algoritmo determinístico puro `matchProcurement` em `@radar/contracts`, cálculo assíncrono via worker com BullMQ, score explicável e persistência em `opportunity_matches`. Testes unitários aprovados. | Sem matching semântico/vetorial; correspondência baseada em substrings de palavras-chave normalizadas; sem palavras-chave negativas. | Acrescentar suporte a palavras-chave negativas e filtros por faixa de valor monetário. |
-| **Inteligência Documental e IA** | `VALIDATED` | `@radar/document-intelligence` com adapters Mock, OpenAI e Gemini; `AIModelRouter` com fallback; extração de requisitos; Opportunity Brief personalizado; controle de tetos de gastos e auditoria em `ai_usage_records`. Modelo `gemini-3.5-flash-lite` homologado com API real; `EvidenceVerifier` determinístico para auditoria de citações; parser PDF via `unpdf`; segmentação temática estruturada com hashes de chunks e cliente seguro `safeDownloadFile`. 60 testes unitários passando e `pnpm smoke:ai` aprovado. | OCR em PDFs exclusivamente escaneados (sem camada de texto). | Homologar chaves de produção de OpenAI quando contratada e calibrar prompts para termos de referência com centenas de páginas. |
+| **Inteligência Documental e IA** | `IN_PROGRESS` | Gemini real sobre metadados validado; cache por configuração e reanálise corrigidos, 5 regressões novas. Download/parser PDF e EvidenceVerifier existem como componentes auxiliares. | Descoberta PNCP, leitura PDF ponta a ponta, fila dedicada, evidências estritas, cobertura visível e orçamento concorrente ainda pendentes. OCR fora do primeiro incremento. | Executar o [MVP documental](roadmap/document-analysis-mvp.md), iniciando pela homologação do inventário PNCP. |
 | **Geografia** | `IN_PROGRESS` | 27 UFs estruturadas em `@radar/contracts`, tabela `municipalities` e endpoint público `GET /geography` com aviso de dados piloto. | Apenas 5 municípios cadastrados no seed de teste (SP, RJ, DF, BH, Curitiba) em vez dos 5.570 municípios da base oficial IBGE. | Desenvolver migration/script para carga integral dos municípios do IBGE com códigos oficiais. |
 | **Alertas** | `IN_PROGRESS` | Tabela `alert_preferences` (frequência diária/semanal), geração de alertas internos em `alerts` pelo worker com chave única contra duplicidade e rotas de leitura. | Notificações restritas ao painel web (in-app); disparo externo de e-mails, resumos periódicos (digest) ou canais móveis/WhatsApp inexistentes. | Construir worker de consolidação e envio externo de notificações e digest por e-mail. |
 | **Assinaturas** | `IN_PROGRESS` | Tabelas `plans` (Local, Regional, Nacional) com entitlements em JSONB, verificação de direitos em `EntitlementsService`, período de avaliação de 14 dias ativo. | Módulo `billing` sem gateway de pagamento integrado (`configured: false`); sem checkout, cobrança recorrente, cancelamento ou tratamento de webhooks. | Integrar provedor de pagamento (PSP), tratar webhooks de forma idempotente e gerenciar status. |

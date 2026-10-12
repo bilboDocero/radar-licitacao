@@ -1,82 +1,52 @@
-# Arquitetura de Inteligência Artificial — Radar Inteligente
+# Arquitetura de inteligência artificial
 
-## 1. Visão Geral
+Revisão: 12/10/2026. Estado observado e evolução definida na [ADR 0007](../adr/0007-document-analysis-mvp.md) e no [escopo mínimo documental](../roadmap/document-analysis-mvp.md).
 
-A camada de inteligência artificial do Radar de Licitações Públicas foi projetada para transformar editais governamentais extensos e complexos em **Opportunity Briefs personalizados e acionáveis** para os fornecedores.
+## Fluxo implementado
 
 ```mermaid
 flowchart TD
-    PNCP[Coleta Oficial PNCP] --> Ingest[Ingestão e Versão]
-    Ingest --> Outbox[Outbox Transacional]
-    Outbox --> Worker[Worker Assíncrono]
-    
-    subgraph Matching e Alerta Imediato
-        Worker --> Match[Matching Determinístico]
-        Match --> PreAlert[Alerta Preliminar In-App]
-    end
-    
-    subgraph Pipeline de Inteligência Documental
-        Match --> Extract[DocumentExtractionService]
-        Extract --> SharedCheck{Já analisado nesta versão?}
-        SharedCheck -- Sim --> Cached[Reaproveita Análise Existente]
-        SharedCheck -- Não --> Router[AIModelRouter & Budget Check]
-        Router --> Provider[AIProvider: Gemini / OpenAI / Mock]
-        Provider --> Validate[Validação Zod de Requisitos]
-        Validate --> DBShared[(procurement_ai_analyses)]
-        
-        Cached --> Brief[OpportunityBriefService]
-        DBShared --> Brief
-        Brief --> DBBrief[(opportunity_briefs)]
-    end
-    
-    DBBrief --> Web[Painel Web do Assinante]
+    A[Metadados da contratação] --> B[ProcurementAnalyzer monta resumo textual]
+    B --> C[Cache por versão, provedor, modelo e prompt]
+    C --> D[AIModelRouter e orçamento acumulado]
+    D --> E[Provedor configurado: Gemini local validado]
+    E --> F[Schema Zod e EvidenceVerifier]
+    F --> G[Análise compartilhada no PostgreSQL]
+    G --> H[Brief por empresa e perfil]
+    H --> I[Página de detalhes]
 ```
 
----
+Chamadas podem ocorrer sob demanda HTTP ou dentro do processamento do matching. O alerta preliminar é persistido antes da análise, mas o worker ainda aguarda a IA no mesmo processamento. A fila `radar-intelligence` está declarada; não há consumidor dedicado conectado ao fluxo atual.
 
-## 2. Componentes e Responsabilidades
+## Componentes existentes e limites observados
 
-### 2.1. `AIProvider` (Interface de Provedores)
-Abstração padronizada para invocar modelos de linguagem com saída JSON Schema estrita:
-- `MockAIProvider`: Execução local determinística com latência zero e custo nulo.
-- `OpenAIProvider`: Chamadas HTTP oficiais com cabeçalhos de autenticação, timeout e formato estruturado `json_schema`.
-- `GeminiProvider`: Chamadas oficiais REST para a família de modelos Gemini da Google.
+| Componente                | Implementado                                                               | Limitação                                                                                                                                                        |
+| ------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AIProvider / adapters     | Mock, OpenAI e Gemini; resposta estruturada validada com Zod.              | Formato válido não comprova fatos. Mock é simulação.                                                                                                             |
+| AIModelRouter             | Seleção de provedor/modelo, fallback configurável e consulta de orçamento. | Ainda permite resolução para mock; a evolução deve impedir fallback operacional simulado.                                                                        |
+| DocumentExtractionService | Download, unpdf, páginas e segmentação por padrões textuais.               | Não chamado pelo analisador para PDFs; falha do parser pode cair em UTF-8; não faz OCR.                                                                          |
+| safeDownloadFile          | Valida URL/DNS/redirecionamentos e verifica tamanho.                       | Limite após leitura completa, timeout encerrado antes do corpo e DNS não fixado na conexão exigem correção.                                                      |
+| EvidenceVerifier          | Compara citações, reclassifica requisitos sem suporte e anota riscos.      | Aceita prefixo de citação longa, ajusta páginas por aproximação e não verifica semanticamente todas as afirmações. A UI não exibe todas as notas/classificações. |
+| ProcurementAnalyzer       | Analisa metadados, persiste resultado e reutiliza cache compatível.        | Não descobre documentos nem analisa edital integral; não identifica o conjunto de anexos.                                                                        |
+| OpportunityBriefService   | Combina análise pública com palavras-chave, categoria e cobertura.         | Score por regras, próximos passos fixos e ausência de comprovação documental da empresa.                                                                         |
+| AIUsageTracker            | Registra tokens, latência e custo estimado; compara gasto diário/mensal.   | Não reserva orçamento concorrente nem garante teto financeiro estrito.                                                                                           |
 
-### 2.2. `AIModelRouter` (Roteamento Dinâmico e Resiliência)
-- Seleciona o modelo com base no tipo de tarefa (`document.requirements_extraction`, `opportunity.brief_generation`, `procurement.classification`).
-- Realiza failover automático para o provedor configurado em `AI_FALLBACK_PROVIDER` caso o primário responda com erro temporário de rate limit (429) ou erro de servidor (5xx).
-- Valida o orçamento com o `AIUsageTracker` antes de disparar chamadas pagas.
+## Cache e reanálise entregues
 
-### 2.3. `DocumentExtractionService` (Pipeline Documental e PDF)
-- Baixa documentos usando o cliente seguro `safeDownloadFile` com proteção estrita contra SSRF, checagem de DNS e limite de 20 MB.
-- Converte arquivos PDF binários em texto página por página via `unpdf`, detectando páginas digitalizadas (scanned) que necessitam de OCR.
-- Segmenta o texto em seções temáticas (Objeto, Habilitação, Prazos, Sanções) com metadados estruturados de chunking (id, ordem, páginas, hash do trecho e estimativa de tokens).
-- Calcula hashes multinível: hash de bytes do arquivo (`documentHash`), hash de texto normalizado (`extractedTextHash`) e hashes de segmentos.
+A análise concluída só é reutilizada se versão da licitação, provedor, modelo e versão de prompt coincidirem. Troca de mock para Gemini gera novo resultado; reanálise explícita força chamada. Briefs antigos são atualizados quando a análise compartilhada tem data mais recente, preservando organização e perfil.
 
-### 2.4. `EvidenceVerifier` (Auditoria Determinística de Evidências)
-- Analisa as citações (`textExcerpt`) e páginas retornadas pela LLM contra o texto bruto extraído do edital.
-- Trechos confirmados literalmente mantêm o status `extracted` e confiança alta (`high`).
-- Citações não localizadas no texto do edital são rebaixadas preventivamente para `inferred` com confiança baixa (`low`) e nota de auditoria explícita, impedindo que alucinações da IA sejam exibidas como fatos confirmados.
+Isso não implementa ainda atualização por hash do conjunto documental ou por mudança de perfil. A restrição única no banco evita duplicidade de registros, mas não impede chamadas concorrentes ao modelo.
 
-### 2.5. `ProcurementAnalyzer` (Análise de Requisitos)
-- Constrói prompts estruturados com instruções explícitas de mitigação de prompt injection.
-- Valida e persiste os requisitos fáticos extraídos em `procurement_ai_analyses`.
-- Garante o **processamento compartilhado**: a mesma versão de edital é analisada apenas uma vez, independentemente de quantas empresas a receberem.
+## Evolução definida, ainda pendente
 
-### 2.6. `OpportunityBriefService` (Brief Personalizado)
-- Cruza a análise documental pública com o perfil comercial privado da empresa (palavras-chave, categorias e cobertura geográfica).
-- Produz uma pontuação de aderência comercial (0 a 100), nível de compatibilidade, justificativas, pontos fortes, lacunas e próximos passos sugeridos.
-- Salva o brief isolado em `opportunity_briefs` com chave única por `(organizationId, profileId, procurementId)`.
+Entregar cinco blocos com evidências, a partir de edital e termo de referência em PDF textual. A API deve agendar trabalho e informar estado, com processamento dedicado em BullMQ. Seleção inicial sob demanda, sem baixar/analisar todos os editais coletados.
 
-### 2.7. `AIUsageTracker` (Auditoria e Custos)
-- Registra cada invocação de IA em `ai_usage_records` com tokens de entrada/saída, latência e custo calculado em USD.
-- Bloqueia novas chamadas se o gasto do dia ou do mês exceder os limites configurados (`AI_DAILY_BUDGET_USD` / `AI_MONTHLY_BUDGET_USD`).
+Reutilizar a análise pública por documentos/hashes e versões do pipeline. Manter briefs privados por organização/perfil, separados do cache compartilhado. Aplicar limites efetivos de download, texto, tokens, tentativas, concorrência e orçamento reservado. Cobertura parcial e falha devem ser visíveis; preservar resultado anterior sem ocultar sua desatualização.
 
----
+Descoberta PNCP, extração/evidências, tela e matriz de testes estão no [plano de entrega](../roadmap/document-analysis-mvp.md). Não há novos endpoints, migrations ou contratos implementados para essa evolução nesta revisão documental.
 
-## 3. Segurança e Governança
+## Segurança e interpretação
 
-1. **Isolamento de Dados:** Dados privados do perfil comercial nunca são enviados para modelos sem garantia de privacidade; o edital analisado é um documento público.
-2. **Defesa contra Prompt Injection:** O conteúdo textual do edital é demarcado como dados brutos e instruções contidas no edital não têm capacidade de alterar as regras do sistema.
-3. **Fidelidade Fática:** O prompt instrui expressamente o modelo a omitir ou marcar como `not_found` qualquer dado ausente, proibindo a invenção de atestados ou exigências inexistentes.
-4. **Isenção Legal:** Todo Opportunity Brief acompanha aviso de isenção de que a análise é preliminar e não constitui parecer jurídico.
+Documentos externos são dados não confiáveis. Prompts devem separar conteúdo de instruções, mas isso sozinho não garante resistência a prompt injection. Downloads exigem validação de destino e limites de recursos; o modelo não deve receber autoridade para executar instruções do edital.
+
+Dados privados de empresas não pertencem à análise pública compartilhada. O resultado é orientação preliminar com evidências e lacunas, não parecer jurídico ou garantia de habilitação. Aderência comercial, cobertura documental e qualidade da evidência são medidas distintas.
